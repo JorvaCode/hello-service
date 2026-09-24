@@ -1,0 +1,237 @@
+name: CD
+
+# Phase 11 — Continuous Delivery (adapter for hello-service).
+# Implements blueprint/11-continuous-delivery.md + ADR-009 (OCI + Podman) + ADR-010 (Quay.io).
+#
+# Flow:
+#   validated commit -> CI gates -> OCI image -> Quay.io -> digest (immutable identity)
+#   -> deploy by digest -> smoke GET /api/hello -> promotion mechanism prepared (SAME digest,
+#   NO podman build). End-to-end promotion runs only once the target environment is configured.
+#
+# ADR-010 authentication:
+#   1) Preferred  : OIDC/keyless via Quay robot-account federation (GitHub OIDC issuer).
+#   2) Alternative: Quay robot account/token stored exclusively as GitHub Actions Secrets.
+# The job fails fast with an explicit message if the external prerequisites are missing
+# (see "External prerequisites" in blueprint/11-continuous-delivery.md).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  cd:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.build.outputs.version }}
+      image: ${{ steps.build.outputs.image }}
+      digest: ${{ steps.publish.outputs.digest }}
+
+    steps:
+      - name: Checkout commit under delivery
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle (project wrapper)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: External prerequisites (fail fast with explicit message)
+        id: prereq
+        env:
+          QUAY_NAMESPACE: ${{ vars.QUAY_NAMESPACE }}
+          QUAY_AUTH: ${{ vars.QUAY_AUTH }}
+          QUAY_ROBOT_USERNAME: ${{ vars.QUAY_ROBOT_USERNAME }}
+          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+          QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
+        run: |
+          set -eu -o pipefail
+          if [[ -z "${QUAY_NAMESPACE}" ]]; then
+            echo "::error::BLOCKED — external configuration: GitHub repository variable 'QUAY_NAMESPACE' is not set (Quay.io namespace/org, e.g. 'jorvacode')."
+            echo "::error::Create first the PUBLIC repo '${QUAY_NAMESPACE:-<ns>}/hello-service' in Quay.io and grant write to the robot account."
+            exit 1
+          fi
+          MODE="${QUAY_AUTH:-oidc}"
+          echo "mode=${MODE}" >> "$GITHUB_OUTPUT"
+          if [[ "${MODE}" == "oidc" ]]; then
+            if [[ -z "${QUAY_ROBOT_USERNAME}" ]]; then
+              echo "::error::BLOCKED — external configuration: OIDC selected (preferred per ADR-010) but variable 'QUAY_ROBOT_USERNAME' is not set."
+              echo "::error::Set it to the federated robot (e.g. 'jorvacode+github_actions') and configure robot federation to THIS repo/sha subject in Quay.io."
+              exit 1
+            fi
+          elif [[ "${MODE}" == "robot" ]]; then
+            if [[ -z "${QUAY_USERNAME}" || -z "${QUAY_TOKEN}" ]]; then
+              echo "::error::BLOCKED — external configuration: robot alternative selected but GitHub Secrets 'QUAY_USERNAME'/'QUAY_TOKEN' are missing."
+              exit 1
+            fi
+          else
+            echo "::error::Unknown QUAY_AUTH mode '${MODE}'. Supported: 'oidc' | 'robot'."
+            exit 1
+          fi
+          echo "Prerequisites OK — auth-mode=${MODE} namespace=${QUAY_NAMESPACE}"
+
+      - name: Phase 09 validation gates (compile + tests + build)
+        run: ./gradlew clean build --no-daemon --console=plain
+
+      - name: "Resolve release version (reproducible source: Gradle project version)"
+        id: version
+        run: |
+          set -eu -o pipefail
+          VERSION=$(./gradlew -q properties --no-daemon --console=plain | awk -F': ' '/^version:/{print $2; exit}')
+          if [[ -z "${VERSION}" ]]; then
+            echo "::error::Could not resolve project version from Gradle."
+            exit 1
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Resolved version=${VERSION}"
+
+      - name: Set up Podman runtime (OCI, ADR-009)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq podman
+
+      - name: Authenticate Quay.io (OIDC keyless preferred / robot secret fallback)
+        env:
+          AUTH_MODE: ${{ steps.prereq.outputs.mode }}
+          QUAY_ROBOT_USERNAME: ${{ vars.QUAY_ROBOT_USERNAME }}
+          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+          QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
+        run: |
+          set -eu -o pipefail
+          if [[ "${AUTH_MODE}" == "oidc" ]]; then
+            OIDC_TOKEN=$(curl -sSf \
+              -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+              -H "Accept: application/json" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}" | python3 -c 'import sys,json;print(json.load(sys.stdin)["value"])')
+            echo "::add-mask::${OIDC_TOKEN}"
+            QUAY_ROBOT_TOKEN=$(curl -sSf \
+              "https://quay.io/oauth2/federation/robot/token" \
+              -u "${QUAY_ROBOT_USERNAME}:${OIDC_TOKEN}" | python3 -c 'import sys,json;print(json.load(sys.stdin)["token"])')
+            echo "::add-mask::${QUAY_ROBOT_TOKEN}"
+            echo "${QUAY_ROBOT_TOKEN}" | podman login quay.io -u "${QUAY_ROBOT_USERNAME}" --password-stdin
+          else
+            echo "${QUAY_TOKEN}" | podman login quay.io -u "${QUAY_USERNAME}" --password-stdin
+          fi
+          podman login --get-login quay.io
+
+      - name: Build OCI image (Phase 10 artifact + provenance labels)
+        id: build
+        env:
+          QUAY_NAMESPACE: ${{ vars.QUAY_NAMESPACE }}
+        run: |
+          set -eu -o pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          IMAGE="quay.io/${QUAY_NAMESPACE}/hello-service:${VERSION}"
+          podman build \
+            --build-arg APP_VERSION="${VERSION}" \
+            --build-arg CI_REPOSITORY="${{ github.repository }}" \
+            --build-arg CI_SHA="${{ github.sha }}" \
+            -t "${IMAGE}" \
+            -f Dockerfile \
+            .
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to Quay.io and record immutable digest
+        id: publish
+        env:
+          QUAY_NAMESPACE: ${{ vars.QUAY_NAMESPACE }}
+        run: |
+          set -eu -o pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          IMAGE="quay.io/${QUAY_NAMESPACE}/hello-service:${VERSION}"
+          mkdir -p build
+          podman push --digestfile build/hello-service.digest "${IMAGE}"
+          if [[ ! -s build/hello-service.digest ]]; then
+            echo "::error::podman push --digestfile did not write a digest file."
+            exit 1
+          fi
+          DIGEST=$(head -n 1 build/hello-service.digest)
+          if [[ ! "${DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "::error::Unexpected digest format: ${DIGEST}"
+            exit 1
+          fi
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "${IMAGE}@${DIGEST}" > build/image-digest.txt
+          echo "Published ${IMAGE}@${DIGEST}"
+
+      - name: Upload digest artifact (traceability)
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-digest
+          path: build/image-digest.txt
+
+      - name: Deploy by digest (Phase 12 pattern, Podman) — SAME artifact, no rebuild
+        env:
+          QUAY_NAMESPACE: ${{ vars.QUAY_NAMESPACE }}
+        run: |
+          set -eu -o pipefail
+          DIGEST="${{ steps.publish.outputs.digest }}"
+          IMAGE_REF="quay.io/${QUAY_NAMESPACE}/hello-service@${DIGEST}"
+          podman rm -f hello-service-cd >/dev/null 2>&1 || true
+          podman run -d --name hello-service-cd -p 8080:8080 "${IMAGE_REF}"
+          echo "Started ${IMAGE_REF} (readiness and function are asserted by the smoke test)"
+
+      - name: "Smoke test GET /api/hello (functional evidence: 200, text/plain, Hello, World!)"
+        run: |
+          set -eu -o pipefail
+          for i in $(seq 1 30); do
+            if curl -fsS --max-time 3 http://127.0.0.1:8080/api/hello >/dev/null 2>&1; then
+              echo "READY (iteration ${i})"
+              break
+            fi
+            sleep 5
+          done
+          CODE=$(curl -sS -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/hello)
+          CT=$(curl -sS -o /dev/null -w "%{content_type}" http://127.0.0.1:8080/api/hello)
+          BODY=$(curl -fsS http://127.0.0.1:8080/api/hello)
+          test "${CODE}" = "200"
+          case "${CT}" in
+            text/plain*) ;;
+            *) echo "::error::Unexpected Content-Type: ${CT}"; exit 1 ;;
+          esac
+          test "${BODY}" = "Hello, World!"
+          echo "SMOKE_OK code=${CODE} content-type=${CT} body=${BODY}"
+
+      - name: Promotion mechanism (prepared) — same digest, NO podman build, target env external
+        id: promote
+        env:
+          QUAY_NAMESPACE: ${{ vars.QUAY_NAMESPACE }}
+        run: |
+          set -eu -o pipefail
+          DIGEST="${{ steps.publish.outputs.digest }}"
+          IMAGE_REF="quay.io/${QUAY_NAMESPACE}/hello-service@${DIGEST}"
+          echo "Promotion mechanism prepared: ${IMAGE_REF}"
+          echo "No second environment is configured yet — end-to-end promotion is NOT executed."
+          echo "image-ref=${IMAGE_REF}" >> "$GITHUB_OUTPUT"
+
+      - name: CD summary
+        env:
+          QUAY_NAMESPACE: ${{ vars.QUAY_NAMESPACE }}
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          # Phase 11 CD — pipeline executed (promotion prepared, not performed)
+
+          | Field | Value |
+          |---|---|
+          | Version | \`${{ steps.version.outputs.version }}\` |
+          | Image | \`quay.io/${QUAY_NAMESPACE}/hello-service:${{ steps.version.outputs.version }}\` |
+          | Digest (immutable identity) | \`${{ steps.publish.outputs.digest }}\` |
+          | Deploy | by digest via Podman (ADR-009) |
+          | Smoke | \`GET /api/hello\` → 200 \`Hello, World!\` |
+          | Promotion | mechanism prepared; same digest, no \`podman build\` (ADR-010); execution requires an external target environment |
+          Run the promoted artifact with: \`podman run ... quay.io/${QUAY_NAMESPACE}/hello-service@${{ steps.publish.outputs.digest }}\`
+          EOF

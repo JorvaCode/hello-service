@@ -1,0 +1,19 @@
+# Phase 12 — Deployment · ADR-009. Build context OCI.
+# Excluye artefactos de build salvo el jar de Phase 10, y evita ficheros de entorno/secrets.
+
+build/*
+!build/libs
+!build/libs/**
+
+bin/
+.gradle/
+.idea/
+*.iml
+.DS_Store
+
+# Secrets / configuracion de entorno: nunca en el contexto de imagen
+*.env
+.env
+application-local.yml
+application-local.yaml
+application-local.properties
