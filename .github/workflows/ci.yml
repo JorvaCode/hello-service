@@ -114,7 +114,9 @@ jobs:
           test -n "$QUAY_TOKEN"
           test "$QUAY_TOKEN" != "null"
 
-          echo "::add-mask::$QUAY_TOKEN" >> "$GITHUB_ENV" 
+          echo "::add-mask::$QUAY_TOKEN"
+          echo "QUAY_TOKEN=$QUAY_TOKEN" >> "$GITHUB_ENV"
+
           echo "Federación OIDC con Quay: OK"
       
       - name: Login en Quay
