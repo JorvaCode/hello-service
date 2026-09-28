@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Phase 13 — Observability (ADR-011): logs estructurados sin nuevas dependencias.
+  Formato consistente para operación con únicamente Logback/SLF4J del runtime
+  (spring-boot-starter-logging, ya presente):
+    timestamp | level | thread | requestId (MDC, reservado para correlación) | logger | mensaje
+  Si el MDC no contiene requestId el campo se muestra como "-" y el formato sigue siendo válido.
+  Sin encoder JSON ni dependencias adicionales (NFR-02 / ADR-008 / ADR-011).
+-->
+<configuration>
+
+    <property name="LOG_PATTERN"
+              value="%date{yyyy-MM-dd&apos;T&apos;HH:mm:ss.SSSXXX} %-5level [%thread] [requestId=%X{requestId:--}] %logger{40} - %msg%n"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>
