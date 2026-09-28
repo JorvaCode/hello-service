@@ -65,3 +65,44 @@ jobs:
             tr '_-' '/+' |
             base64 -d 2>/dev/null |
             jq '{iss, sub, aud, repository, repository_id, repository_owner, repository_owner_id}'
+
+      - name: Probar federación OIDC con Quay
+        shell: bash
+        env:
+          QUAY_ROBOT_USER: odysseia+github_actions
+        run: |
+          set -euo pipefail
+
+          OIDC_TOKEN=$(curl -sSf \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL" |
+            jq -r '.value')
+
+          test -n "$OIDC_TOKEN"
+          echo "::add-mask::$OIDC_TOKEN"
+
+          echo "Solicitando token federado a Quay..."
+
+          RESPONSE=$(curl -sS \
+            -w '\n%{http_code}' \
+            -u "$QUAY_ROBOT_USER:$OIDC_TOKEN" \
+            "https://quay.io/oauth2/federation/robot/token")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "HTTP: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Respuesta de Quay:"
+            echo "$BODY"
+            exit 1
+          fi
+
+          QUAY_TOKEN=$(echo "$BODY" | jq -r '.token')
+
+          test -n "$QUAY_TOKEN"
+          test "$QUAY_TOKEN" != "null"
+
+          echo "::add-mask::$QUAY_TOKEN"
+          echo "Federación OIDC con Quay: OK"
