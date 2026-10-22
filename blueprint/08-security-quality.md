@@ -10,33 +10,23 @@ Security and quality checks are part of the delivery pipeline.
 - License checks where required
 - Container image scanning where applicable
 - SAST/DAST where appropriate
+- Architecture or dependency rule checks where the project can enforce them
 
 ## Principle
 Controls should be proportional to project risk and should provide actionable feedback.
+Where the project can automate part of `standards/code-design.md` — static analysis, dependency
+rules, complexity or duplication thresholds — it should; the rest stays in code review.
 
----
+## Information items
+### Inputs
+- **The change** — its diff and the dependency manifest it modifies.
+- **Architecture** — the security boundaries and data ownership from `03-architecture.md`, which determine what is actually at risk.
+- **Control inventory** — the controls the project runs, and the risk rating of the change.
 
-# Report: REQ-HELLO-001 — GET /api/hello
+### Outputs
+- **Control results** — for each control the project runs: pass, fail, or skipped, with the tool and its version. A control with no recorded result is not assumed to have passed.
+- **Findings** — each with a severity and either a fix or a residual risk acceptance that names an owner and a review date.
+- **Proportionality record** — which controls were skipped and why, where the risk rating permits it. This is the artifact that distinguishes a deliberate decision from an oversight.
 
-Scope: `hello-service` (Spring Boot 3.5.3 / Java 21 toolchain, Gradle).
-Control set is proportional to the feature risk (stateless single endpoint, no input, no persistence, no auth).
-
-## Controls and results
-
-| # | Control | Result | Evidence |
-|---|---|---|---|
-| C-1 | Dependency inspection (runtime) | PASS | `gradlew dependencies --configuration runtimeClasspath` → BUILD SUCCESSFUL. Root resolves only to `spring-boot-starter-web:3.5.3` plus its transitive tree (spring-* 6.2.8, tomcat-embed 10.1.42, jackson 2.19.1, logback 1.5.18, snakeyaml 2.4, micrometer 1.15.1). No runtime dependency added outside the starter and its transitives. Confirms design NFR-02 / ADR-008 ("no new dependencies"). |
-| C-2 | Build + tests | PASS | `gradlew compileJava test --warning-mode all` → BUILD SUCCESSFUL (3 up-to-date tasks, no compiler warnings). Prior evidence: `gradlew clean build` → BUILD SUCCESSFUL (review 07). |
-| C-3 | Secret detection | PASS | Regex scan across `hello-service` for credentials/tokens/private keys (password, secret, api key, token, PEM private key, AWS key pattern). No findings. No runtime config files other than `gradle-wrapper.properties` (distribution URL only). |
-| C-4 | Static analysis / lint | PARTIAL | No static-analysis or formatting plugin is configured in `build.gradle.kts` (no checkstyle/spotless/spotbugs/spotless). Compiler-level check passed clean (C-2). Adding a lint/format gate is deferred to the CI phase (09). No blocking issue found. |
-| C-5 | Dependency vulnerabilities | PARTIAL | Automated vulnerability scanner (OWASP dependency-check / grype / Snyk) is not configured. Versions resolved from the Spring Boot 3.5.3 managed BOM were inspected manually via C-1 (all current managed versions). Automated scanning is deferred to CI (09) and recorded as a follow-up. |
-| C-6 | License check | N/A | No direct third-party dependency beyond the Spring Boot BOM-managed starter set; no LICENSE requirement has been defined for this project. Not applicable for this change. |
-| C-7 | Container image scanning | N/A | No container image exists yet; packaging is a later phase (10/12). |
-| C-8 | SAST/DAST | N/A | No deployable runtime surface beyond the reviewed endpoint; contract tests (06) already cover method enforcement (405 + Allow) and unknown-path 404. |
-
-## Conclusion
-Phase 8 gate: PASS. The change introduces no new runtime dependency (C-1) and no secret material (C-3); build and tests are green (C-2). Remaining automation (lint gate, dependency-vulnerability scan) is a CI-phase concern (09) and is documented there, not a blocker for this phase.
-
-## Follow-ups (carried to Phase 9)
-- Configure a lint/formatting gate (e.g. checkstyle/spotless) in CI.
-- Configure dependency-vulnerability scanning (e.g. OWASP dependency-check) in CI.
+## Quality gate
+Every control in the project's inventory has a recorded result for the current commit, and every finding is either fixed or carries a residual risk acceptance with an owner and a review date. A reviewer who did not run the controls reaches the same verdict from the control results and the proportionality record.

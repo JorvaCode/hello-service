@@ -15,33 +15,17 @@ Create a deployable artifact.
 - Metadata/provenance where practical
 - No secrets embedded in artifacts
 
-## Gate
-Artifact can be identified, retrieved and deployed independently of the source workspace.
+## Information items
+### Inputs
+- **A verified build** — the output of a CI run that passed its required checks, from `09-continuous-integration.md`.
+- **Version and metadata** — the version to stamp, and the metadata the project publishes.
+- **Secret material** — the project's secrets, which are inputs to the build and never to the artifact.
 
----
+### Outputs
+- **Versioned artifact** — carrying a version that identifies exactly this build.
+- **Artifact identity** — the digest or checksum that distinguishes this artifact from every other, and that a consumer can verify after transfer.
+- **Provenance and metadata** — where the project can produce them, recorded with the artifact. Absent otherwise, which is a known gap rather than an unstated one.
+- **Secret scan result** — the evidence that no secret is embedded, produced before publication.
 
-# Report: REQ-HELLO-001 — hello-service
-
-## Deployable artifact
-- Spring Boot executable JAR (fat jar): `build/libs/hello-service-0.0.1-SNAPSHOT.jar`
-- Secondary thin JAR: `build/libs/hello-service-0.0.1-SNAPSHOT-plain.jar`
-- Producer: `gradlew clean build` (`bootJar` task), Spring Boot plugin 3.5.3 / Java toolchain 21.
-
-## Requirements
-| Requirement | Result | Evidence |
-|---|---|---|
-| Versioned artifact | PASS | Filename and manifest carry `0.0.1-SNAPSHOT` (project version). |
-| Reproducible build | PASS | `isPreserveFileTimestamps=false`, `isReproducibleFileOrder=true` configured on archive tasks; two consecutive `clean build` runs produced identical SHA-256 (`BC26F343...216303`). |
-| Metadata/provenance | PASS | Manifest: `Implementation-Title`, `Implementation-Version`, `Build-Jdk-Spec: 21`, `Spring-Boot-Version: 3.5.3`, `Main-Class`/`Start-Class`. Artifact traceable to CI build commit (`github.sha`). |
-| No secrets embedded | PASS | No sensitive files inside JAR (no `.properties`, `.env`, `.pem`, `.key`, secret/credential files); `BOOT-INF/classpath.idx` lists only standard dependencies. |
-
-## Verification
-- `.\gradlew.bat clean build` → BUILD SUCCESSFUL (7 tasks), exit 0.
-- JAR inspected: contains `BOOT-INF/classes/com/example/hello/HelloApplication.class` and `HelloHandler.class`; manifest metadata confirmed.
-- JAR can be identified, retrieved from `build/libs/` and deployed independently of the source workspace (Phase 10 gate satisfied).
-
-## Scope notes
-- Container image is not produced in this phase: NFR-02 / external deployment target not yet defined; container packaging is deferred to a later decision and is not part of this change (consistent with Phase 08 C-7 and Phase 12 deployment platform decision).
-
-## Date
-2026-09-24
+## Quality gate
+The artifact carries a version and an identity that a consumer can verify independently of the source workspace, and the secret scan result for this build is recorded. A consumer who received only the artifact can determine which version it is and whether it matches what the pipeline produced.

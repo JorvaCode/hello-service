@@ -1,273 +1,90 @@
 ---
 name: blueprint
-description: Orchestrates the Software Engineering Blueprint lifecycle from requirements to continuous delivery.
+description: Route a software change through the Software Engineering Blueprint lifecycle, from requirements to continuous improvement. Use for any feature, bug, refactor or technical request that needs more than a one-shot edit.
 ---
 
 # Software Engineering Blueprint
 
-You are the orchestrator of the Software Engineering Blueprint.
-
-Your responsibility is to guide software changes through a structured engineering lifecycle.
-
-## Core lifecycle
-
-Follow this lifecycle:
-
-1. Requirements
-2. Analysis
-3. Architecture
-4. Technical Design
-5. Implementation
-6. Testing
-7. Code Review
-8. Security & Quality
-9. Continuous Integration
-10. Packaging
-11. Continuous Delivery
-12. Deployment
-13. Observability
-14. Continuous Improvement
-
-## Fundamental rules
-
-- Do not jump directly into implementation when requirements are unclear.
-- Understand the existing project before modifying it.
-- Prefer the smallest coherent change.
-- Preserve existing architecture unless there is a documented reason to change it.
-- Every significant change must have verification.
-- Tests are part of implementation, not an optional final step.
-- Security and quality must be considered before delivery.
-- CI must validate the change automatically.
-- Deployable artifacts must be identifiable and reproducible where practical.
-- Deployment must be repeatable.
-- Production feedback must feed continuous improvement.
-
-## Phase 1 — Requirements
-
-Identify:
-
-- Problem
-- Objective
-- Scope
-- Functional requirements
-- Non-functional requirements
-- Acceptance criteria
-- Dependencies
-- Risks
-- Assumptions
-
-Use:
-
-`templates/requirement.md`
-
-Do not implement until the requirement is sufficiently clear.
-
-## Phase 2 — Analysis
-
-Inspect the existing system.
-
-Determine:
-
-- Existing components
-- Existing architecture
-- Dependencies
-- Domain concepts
-- Integration points
-- Constraints
-- Possible implementation alternatives
-
-Explain important trade-offs.
-
-## Phase 3 — Architecture
-
-Determine how the change fits the existing architecture.
-
-Consider:
-
-- Component boundaries
-- Responsibilities
-- Dependencies
-- APIs
-- Data ownership
-- Integration patterns
-- Security boundaries
-- Scalability
-- Observability
-- Deployment implications
-
-For significant architectural decisions use:
-
-`templates/adr.md`
-
-## Phase 4 — Technical Design
-
-Define:
-
-- Interfaces
-- Contracts
-- Data models
-- Validation
-- Error handling
-- Transactions
-- Design patterns where justified
-- Test strategy
-- Configuration
-- Operational requirements
-
-The design must be sufficiently clear for implementation.
-
-## Phase 5 — Implementation
-
-Implement the approved design.
-
-Rules:
-
-- Make small coherent changes.
-- Follow project standards.
-- Do not introduce unrelated refactoring.
-- Keep architecture boundaries intact.
-- Add or update automated tests.
-- Keep documentation synchronized.
-
-## Phase 6 — Testing
-
-Determine the appropriate testing levels:
-
-- Unit
-- Integration
-- Contract/API
-- End-to-end
-- Performance when required
-- Security when required
-
-All relevant acceptance criteria must have verification.
-
-## Phase 7 — Code Review
-
-Review:
-
-- Requirements
-- Architecture
-- Design
-- Maintainability
-- Error handling
-- Tests
-- Security
-- Performance
-- Unnecessary complexity
-- Scope
-
-## Phase 8 — Security & Quality
-
-Check applicable:
-
-- Static analysis
-- Formatting/linting
-- Dependency vulnerabilities
-- Secrets
-- License requirements
-- Container vulnerabilities
-- SAST/DAST where appropriate
-
-## Phase 9 — Continuous Integration
-
-The change must be validated through CI.
-
-Typical sequence:
-
-Build
-→ Tests
-→ Quality
-→ Security
-→ Package
-
-Do not consider the change integrable if required quality gates fail.
-
-## Phase 10 — Packaging
-
-Produce a versioned deployable artifact where applicable.
-
-Examples:
-
-- Application package
-- Container image
-- Helm chart
-- Deployment bundle
-
-Never embed secrets in artifacts.
-
-## Phase 11 — Continuous Delivery
-
-Move the validated artifact through the delivery process.
-
-Typical flow:
-
-CI
-→ Artifact
-→ Registry
-→ Environment validation
-→ Deployment
-→ Smoke tests
-→ Promotion
-
-Prefer promoting the same artifact between environments.
-
-## Phase 12 — Deployment
-
-Consider:
-
-- Configuration
-- Secrets
-- Database migrations
-- Health checks
-- Readiness
-- Rollback
-- Deployment strategy
-- Environment configuration
-
-## Phase 13 — Observability
-
-Ensure the deployed system provides appropriate:
-
-- Logs
-- Metrics
-- Traces
-- Alerts
-- Health checks
-
-Operational failures must be detectable and diagnosable.
-
-## Phase 14 — Continuous Improvement
-
-Use feedback from:
-
-- Incidents
-- Metrics
-- Users
-- Retrospectives
-- Technical debt
-- Security findings
-- Performance findings
-
-Feed relevant findings back into future requirements and architecture.
-
-## Behaviour
-
-When the user gives you a software requirement:
-
-1. Determine the current lifecycle phase.
-2. Identify missing information.
-3. Inspect the project before making assumptions.
-4. Explain the proposed next step briefly.
-5. Produce or update the appropriate blueprint artifact.
-6. Only then proceed to the next phase.
-7. Maintain traceability between requirement, design, implementation and tests.
-8. Never skip a phase silently.
-9. If a phase is not applicable, explicitly state why.
-10. At the end, verify the Definition of Done.
-
-The Blueprint is technology and IDE agnostic.
-
-It can be applied to projects using IntelliJ IDEA, Visual Studio, VS Code or other development environments.
-
-OpenCode is an optional execution assistant, not a dependency of the Blueprint itself.
+This skill is a router, not a copy of the blueprint. The normative definition lives in
+`blueprint/`. Read the phase document you need; do not work from memory of the phases.
+
+All paths below are relative to the project root.
+
+## Operating rules
+
+1. Determine the current lifecycle phase before acting.
+2. Inspect the existing project before making assumptions.
+3. Do not implement while requirements are ambiguous — ask.
+4. Never skip a phase silently; if one does not apply, say why.
+5. Produce or update the artifact the phase requires.
+6. Keep traceability between requirement, design, implementation and tests.
+7. Verify `standards/definition-of-done.md` before declaring work complete.
+8. Check design quality against `standards/code-design.md`. Patterns require a stated
+   justification; their absence is never a defect.
+
+`blueprint/00-principles.md` holds the full principle set.
+
+## Phase map
+
+| Phase | Document | Typical artifact |
+| --- | --- | --- |
+| 00 Principles | `blueprint/00-principles.md` | — |
+| 01 Requirements | `blueprint/01-requirements.md` | `templates/requirement.md` |
+| 02 Analysis | `blueprint/02-analysis.md` | notes in the requirement |
+| 03 Architecture | `blueprint/03-architecture.md` | `templates/adr.md` |
+| 04 Technical design | `blueprint/04-design.md` | `templates/change.md` |
+| 05 Implementation | `blueprint/05-implementation.md` | code + tests |
+| 06 Testing | `blueprint/06-testing.md` | test results |
+| 07 Code review | `blueprint/07-code-review.md` | review findings |
+| 08 Security & quality | `blueprint/08-security-quality.md` | scan results |
+| 09 Continuous integration | `blueprint/09-continuous-integration.md` | pipeline run |
+| 10 Packaging | `blueprint/10-packaging.md` | versioned artifact |
+| 11 Continuous delivery | `blueprint/11-continuous-delivery.md` | promotion record |
+| 12 Deployment | `blueprint/12-deployment.md` | deployment record |
+| 13 Observability | `blueprint/13-observability.md` | signals and alerts |
+| 14 Continuous improvement | `blueprint/14-continuous-improvement.md` | backlog items |
+
+## Workflow
+
+1. Read `blueprint/01-requirements.md` and fill in `templates/requirement.md`.
+2. If the change is significant, read `blueprint/03-architecture.md` and record a decision
+   with `templates/adr.md`.
+3. Read `blueprint/04-design.md` and record the approach with `templates/change.md`.
+4. Implement following `blueprint/05-implementation.md` and `blueprint/06-testing.md`.
+5. Run the checks in `blueprint/08-security-quality.md` that apply to the project.
+6. Close against `standards/definition-of-done.md`, `standards/git.md` and
+   `standards/code-design.md`.
+
+## Standards
+
+The standards in `standards/` apply to every change, not only to one phase. Load the ones
+the change needs; a standard that is never routed to is a standard nobody reads.
+
+- `standards/definition-of-done.md` — the criteria a change is closed against.
+- `standards/git.md` — branches, commits and pull requests.
+- `standards/code-design.md` — design quality, SOLID, Clean Code and pattern selection.
+- `standards/normative-language.md` — modality, and how to write a gate that can fail.
+- `standards/terms.md` — the vocabulary; load it before interpreting a term the phase
+  documents do not define.
+- `standards/information-items.md` — what a phase artifact shall contain.
+
+## Phase skills
+
+Load these when a single phase needs focused attention:
+
+- `blueprint-requirements` — phases 01 and 02.
+- `blueprint-architecture` — phases 03 and 04.
+- `blueprint-development` — phases 05 to 08.
+- `blueprint-cicd` — phases 09 to 14.
+
+## Subagents
+
+For a full autonomous pass over a repository with no interactive user — a gap report, a
+readiness audit, a scaffold — invoke the `blueprint-orchestrator` subagent instead of
+loading this skill repeatedly.
+
+## Scope
+
+The blueprint is IDE and technology agnostic. OpenCode is an optional adapter
+(ADR-002), not a dependency: the process applies unchanged in IntelliJ IDEA, Visual Studio,
+VS Code or any other environment.

@@ -8,11 +8,11 @@ El Blueprint debe ser compatible con el desarrollo asistido por IA. OpenCode pue
 
 ## Options considered
 1. Hacer de OpenCode el runtime principal y obligatorio para operar el Blueprint.
-2. Mantener el núcleo del Blueprint agnóstico y proporcionar los skills de OpenCode como adaptador opcional, descubrible desde .opencode/skills/<name>/SKILL.md.
+2. Mantener el núcleo del Blueprint agnóstico y proporcionar los skills de OpenCode como adaptador opcional, descubrible desde `.opencode/skills/<name>/SKILL.md`.
 3. Soportar desde el inicio adaptadores paralelos para múltiples herramientas de IA (Cursor, Copilot, etc.).
 
 ## Decision
-Opción 2: OpenCode es un adaptador opcional, no una dependencia. Los skills residen en .opencode/skills/<name>/SKILL.md y son descubribles automáticamente cuando se usa OpenCode. El núcleo del Blueprint en blueprint/, templates/ y standards/ no requiere OpenCode para aplicarse.
+Opción 2: OpenCode es un adaptador opcional, no una dependencia. Los skills residen en `.opencode/skills/<name>/SKILL.md` y son descubribles automáticamente cuando se usa OpenCode. El núcleo del Blueprint en blueprint/, templates/ y standards/ no requiere OpenCode para aplicarse.
 
 ## Consequences
 ### Positive

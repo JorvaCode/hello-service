@@ -1,4 +1,4 @@
-# ADR-<ID>: <Decision title>
+# ADR-`<ID>`: `<Decision title>`
 
 ## Status
 Proposed | Accepted | Superseded | Rejected

@@ -1,0 +1,21 @@
+{
+  "blueprint": "software-engineering-blueprint",
+  "version": "1.2.0-dev",
+  "installedAt": "2026-10-22T10:07:55Z",
+  "installer": "scripts/blueprint-init.ps1",
+  "licenses": {
+    "documentation": "CC-BY-4.0",
+    "code": "Apache-2.0",
+    "files": [
+      "LICENSE",
+      "LICENSE-CODE"
+    ]
+  },
+  "entries": [
+        "blueprint",
+        "templates",
+        "standards",
+        ".opencode/agents",
+        ".opencode/skills"
+  ]
+}
