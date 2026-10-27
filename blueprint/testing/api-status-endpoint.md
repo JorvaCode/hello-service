@@ -4,9 +4,9 @@
 - Requirement: `blueprint/requirements/api-status-endpoint.md`.
 - Design: `blueprint/design/api-status-endpoint.md`.
 - Implementation: `StatusHandler` and its two test classes.
-- Environment: Windows, PowerShell 5.1, Java 21, Spring Boot 3.5.3 with embedded Tomcat, Gradle wrapper, offline dependency cache, no daemon.
-- Date: 2026-10-23.
-- Commit basis: `HEAD 5d6bdcd18ab105ea201e81a3dac24438700519ff` with a dirty working tree; the run is therefore not commit-bound (L-01).
+- Environment: Windows, PowerShell 5.1, Java 21, Spring Boot 3.5.3 with embedded Tomcat, Gradle wrapper 8.14.2, offline dependency cache, no daemon.
+- Date: 2026-10-27.
+- Commit basis: `HEAD f2b03e5f8d8306192922051dbf6359e23a9a0ee2`; the working tree was clean before and after the test run, so the result is commit-bound.
 
 ## Test suite
 | Test class | Tests | Purpose |
@@ -18,11 +18,14 @@
 | **Total** | **17** | |
 
 ## Test run result
+- Commit: `f2b03e5f8d8306192922051dbf6359e23a9a0ee2`.
+- Working tree: clean before and after the run.
+- Environment: Windows, PowerShell 5.1, Java 21, Spring Boot 3.5.3 with embedded Tomcat, Gradle wrapper 8.14.2, offline dependency cache, no daemon.
+- Date: 2026-10-27.
 - Command: `.\gradlew.bat clean test --offline --no-daemon --console=plain`
 - Result: `BUILD SUCCESSFUL`.
 - Counts: 17 tests, 0 failures, 0 errors, 0 skipped.
-- Gate reassessment rerun on 2026-10-23: same command; `BUILD SUCCESSFUL`, 17/0/0/0. The working tree remained dirty, so this rerun is also not commit-bound.
-- Evidence: `build/test-results/test/*.xml`.
+- Evidence: `build/test-results/test/*.xml`; the suite files record 17 tests with 0 failures, 0 errors and 0 skipped, timestamped after the commit was created.
 - New file SHA-256 values:
   - `StatusHandler.java`: `2C9F6D9888B0A5B7D83E9927C0793D9161D3B5808F30850E05518294A2DE2413`
   - `StatusHandlerTest.java`: `C84E2BF6ADDDA9C3BBFA2E43AD34BD8D76B85AD249807A3D3564FAE727560436`
@@ -87,7 +90,7 @@ No open defect remains for the tested behaviour. The error-body observation is r
 ## Gate assessment
 - Test execution and criterion coverage pass: 17 tests, 0 failures, every AC has automated verification or a named review check.
 - Scenario coverage is recorded for QAS-01 … QAS-06.
-- F-01 is closed under the approved NFR-06 scope.
-- L-01 remains: the test run is not commit-bound because the working tree contains uncommitted changes at `HEAD 5d6bdcd18ab105ea201e81a3dac24438700519ff`, and no commit was authorised.
-- `blueprint/06-testing.md` requires: "The test run result for the current commit is recorded and every required check passed." Its Outputs rule for the Test run result also states: "A green result without [the environment, the commit and the command] is not evidence." The only explicit exception in that phase is for an `AC-nn` without automated verification, not for a non-commit-bound run. `standards/terms.md` defines normative text as "comply, or record a reason for not complying", but no rule turns a recorded reason into a satisfied Phase 06 gate, and `standards/definition-of-done.md` requires every criterion to be satisfied. An accepted L-01 exception would therefore bypass the gate rather than apply one.
-- Phase 06 is **OPEN**. Closing it requires commit authorisation, a commit of the tested tree, and a clean test run on that commit. A change to the Blueprint's gate would be a separate normative change and is out of scope. No commit or push was performed.
+- F-01 is closed under the approved NFR-06 scope; the error-body observation remains a residual risk, not an open defect.
+- L-01 is resolved: the recorded run is commit-bound to `f2b03e5f8d8306192922051dbf6359e23a9a0ee2` with a clean working tree, and the environment, commit and command are recorded.
+- Checked against `blueprint/06-testing.md`: the test suite and its mapped coverage, the test run result with environment, commit and command, the criterion coverage, the scenario coverage and the defect record are all present, and every required check passed. A reviewer who did not run the tests reaches the same verdict from this report.
+- Phase 06 is **CLOSED**. No release or push was performed.
