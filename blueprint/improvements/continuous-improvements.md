@@ -21,7 +21,7 @@ improvement candidates below.
 | Local execution | Retain the recorded execution evidence; do not invent an undocumented startup command | Evidence retained; reproducible procedure pending |
 | `CHANGELOG.md` | Do not create | Approved |
 | Blueprint formal validation | Do not claim validation | Remains `NOT VERIFIED` |
-| Gates P-02, P-06, P-07, P-10 and P-11 | Do not close because publication is postponed | P-02, P-07, P-10 and P-11 remain open or not verified; P-06 is closed by the recorded test run |
+| Gates P-02, P-06, P-07, P-10 and P-11 | Do not close because publication is postponed | P-02, P-07 and P-11 remain open or not verified; P-06 and P-10 are closed by recorded evidence |
 | Real CI execution | Record the first successful GitHub Actions run | Completed - run 10 on `6ccd170` concluded `success` |
 | IMP-001, IMP-002 and IMP-003 | Keep as `Deferred` | No change |
 
