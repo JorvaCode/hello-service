@@ -31,6 +31,21 @@
   - `StatusHandlerTest.java`: `C84E2BF6ADDDA9C3BBFA2E43AD34BD8D76B85AD249807A3D3564FAE727560436`
   - `StatusEndpointTest.java`: `45211F48E7F97EDDCB6DACCC1894312C5A13EE0F72999FB15B536A927A7FF65E`
 
+## Re-run at closure HEAD
+
+- Commit: `72c2ad51cb9d5d1805ec37ff94f297c11d7b14bd` (HEAD of `docs/closure-hello-service`).
+- Working tree: clean before and after the run.
+- Date: 2026-10-30.
+- Environment: Windows, PowerShell 5.1, Java 21, Spring Boot 3.5.3 with embedded Tomcat,
+  Gradle wrapper 8.14.2, offline dependency cache, no daemon.
+- Command: `.\gradlew.bat clean test --offline --no-daemon --console=plain`
+- Result: `BUILD SUCCESSFUL`.
+- Counts: 17 tests, 0 failures, 0 errors, 0 skipped.
+- Per class: `HelloEndpointTest` 6, `HelloHandlerTest` 3, `StatusEndpointTest` 6,
+  `StatusHandlerTest` 2.
+- Scope: no production or test source changed since `f2b03e5`, so the criterion coverage
+  above still applies. Later commits in the closure change set are documentation-only.
+
 ### Live HTTP probe
 The application was run on `127.0.0.1:18080` and probed directly.
 
@@ -92,5 +107,6 @@ No open defect remains for the tested behaviour. The error-body observation is r
 - Scenario coverage is recorded for QAS-01 … QAS-06.
 - F-01 is closed under the approved NFR-06 scope; the error-body observation remains a residual risk, not an open defect.
 - L-01 is resolved: the recorded run is commit-bound to `f2b03e5f8d8306192922051dbf6359e23a9a0ee2` with a clean working tree, and the environment, commit and command are recorded.
+- The closure HEAD run at `72c2ad51cb9d5d1805ec37ff94f297c11d7b14bd` is green and commit-bound with a clean working tree; later closure commits are documentation-only.
 - Checked against `blueprint/06-testing.md`: the test suite and its mapped coverage, the test run result with environment, commit and command, the criterion coverage, the scenario coverage and the defect record are all present, and every required check passed. A reviewer who did not run the tests reaches the same verdict from this report.
 - Phase 06 is **CLOSED**. No release or push was performed.

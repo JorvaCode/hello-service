@@ -97,7 +97,7 @@ esa aprobación sigue pendiente y no debe presentarse como obtenida.
 | Área | Evidencia de configuración | Evidencia de ejecución real | Estado |
 |---|---|---|---|
 | CI | `.github/workflows/ci.yml` define un único job de build/test, construcción de la imagen y registro de su identidad; no contiene ruta de publicación | No hay evidencia en el repositorio de una ejecución real en GitHub Actions | Configuración presente; CI-02 `NO VERIFICADO` |
-| Pruebas locales | Gradle Wrapper y suite automatizada | Ejecución registrada de 17 tests sobre `f2b03e5` | Ejecución local documentada; no repetida sobre el `HEAD` actual |
+| Pruebas locales | Gradle Wrapper y suite automatizada | Ejecución registrada de 17 tests sobre `f2b03e5` y repetida sobre `72c2ad5` | Ejecución local documentada y repetida sobre el `HEAD` del cierre |
 | Despliegue local | `Dockerfile` OCI, usuario no-root, puerto `8080` y entrypoint del JAR | Probe local registrado en `127.0.0.1:18080` | Ejecución observada; procedimiento reproducible pendiente |
 | CD / Quay | `.github/workflows/cd.yml` contiene disparadores, pasos de OIDC, login y push a Quay | No hay evidencia de ejecución ni de publicación o digest remoto | Publicación remota pospuesta; ruta potencial conservada y riesgo documentado |
 
