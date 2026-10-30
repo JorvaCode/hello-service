@@ -45,6 +45,10 @@ step:
 - CI: run 10 (`pull_request`) on commit `6ccd170` completed with `success`; every step
   passed, including build and test, container image build, identity record and artifact
   upload. Evidence: GitHub Actions run `41043812371`, artifact `artifact-metadata`.
+- Packaging: run 13 (`pull_request`) on commit `2e54476` completed with `success`; the
+  secret scan, version resolution, versioned image, identity record and artifact uploads
+  passed. Artifacts: `artifact-metadata`, `hello-service-0.1.0` and `gitleaks-report`.
+  Evidence: GitHub Actions run `41046888744`.
 - CD and remote publication: no `cd.yml` execution, remote publication or remote digest
   has been verified in this closure.
 
@@ -57,8 +61,8 @@ step:
   `workflow_dispatch`, including OIDC, registry login and image push. It is not modified
   by this closure and no execution or publication is claimed.
 - The gate identifiers P-02, P-06, P-07, P-10 and P-11 are defined in `blueprint/gates.md`.
-- This section does not close CD-01, P-02, P-07, P-10 or P-11. The Quality gate above
-  remains applicable whenever a promotion actually occurs.
+- This section does not close CD-01, P-02, P-07 or P-11. The Quality gate above remains
+  applicable whenever a promotion actually occurs.
 
 ## Environments
 Common examples:

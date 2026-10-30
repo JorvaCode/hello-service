@@ -35,9 +35,12 @@
   gitleaks-report.json --exit-code 1`.
 - The report is uploaded as the `gitleaks-report` artifact and the step fails the job if a
   finding is reported.
-- Result: pending the first CI run with `CHG-PKG-001`.
+- Result: GitHub Actions run 13 on `2e54476` completed with `success`; the scan step used
+  `--exit-code 1`, so its success means no finding was reported. The `gitleaks-report`
+  artifact (159 bytes) is attached to the run.
+- Evidence: `https://github.com/JorvaCode/hello-service/actions/runs/41046888744`.
 
 ## Gate
 
-- P-10 remains `NOT VERIFIED` until the CI run with the secret scan completes and its
-  result is recorded here.
+- P-10 is `CLOSED` for run 13. The artifact metadata, versioned JAR and secret scan report
+  are attached to that run.
