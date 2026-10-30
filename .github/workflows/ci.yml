@@ -1,142 +1,57 @@
 name: CI
 
-# Phase 09 — Continuous Integration (adapter for hello-service).
-# Implements blueprint/09-continuous-integration.md for this project.
-# GitHub Actions is an adapter of the Blueprint, not a Blueprint requirement.
-
 on:
   push:
-    branches: ["**"]
+    branches: [main]
   pull_request:
-    branches: ["**"]
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
-  id-token: write
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
+  validate:
+    name: Build and test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - name: Checkout commit under validation
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Java 21
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
 
-      - name: Set up Gradle (uses project wrapper, caches Gradle distribution)
-        uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v4
 
-      - name: Phase 09 - Build (clean compile)
-        run: ./gradlew clean compileJava --no-daemon --console=plain
+      - name: Build and test
+        run: ./gradlew clean build --no-daemon --console=plain
 
-      - name: Phase 09 - Tests
-        run: ./gradlew test --no-daemon --console=plain
-
-      - name: Phase 09 - Quality Gate (build + check)
-        run: ./gradlew build --no-daemon --console=plain
-
-      - name: Print build outcome (require all steps green for CI PASS)
-        run: echo "CI PASS for commit ${{ github.sha }}"
-
-      - name: Construir imagen OCI
+      - name: Build container image
         shell: bash
         run: |
           set -euo pipefail
-
           podman build \
-            -t quay.io/odysseia/hello-service:${GITHUB_SHA} \
-            -t quay.io/odysseia/hello-service:latest \
-            .
-      
-      # - name: Inspeccionar claims OIDC
-      #   shell: bash
-      #   run: |
-      #     set -euo pipefail
+            --build-arg CI_REPOSITORY="${GITHUB_REPOSITORY}" \
+            --build-arg CI_SHA="${GITHUB_SHA}" \
+            -t "localhost/hello-service:${GITHUB_SHA}" .
 
-      #     OIDC_TOKEN=$(curl -sSf \
-      #       -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-      #       "$ACTIONS_ID_TOKEN_REQUEST_URL" |
-      #       jq -r '.value')
-
-      #     PAYLOAD=$(echo "$OIDC_TOKEN" | cut -d '.' -f 2)
-
-      #     # Añadir padding Base64 si es necesario
-      #     case $((${#PAYLOAD} % 4)) in
-      #       2) PAYLOAD="${PAYLOAD}==" ;;
-      #       3) PAYLOAD="${PAYLOAD}=" ;;
-      #     esac
-
-      #     echo "$PAYLOAD" |
-      #       tr '_-' '/+' |
-      #       base64 -d 2>/dev/null |
-      #       jq '{iss, sub, aud, repository, repository_id, repository_owner, repository_owner_id}'
-
-      - name: Obtener token federado de Quay
-        shell: bash
-        env:
-          QUAY_ROBOT_USER: odysseia+github_actions
-        run: |
-          set -euo pipefail
-
-          OIDC_TOKEN=$(curl -sSf \
-            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "$ACTIONS_ID_TOKEN_REQUEST_URL" |
-            jq -r '.value')
-
-          test -n "$OIDC_TOKEN"
-          echo "::add-mask::$OIDC_TOKEN"
-
-          echo "Solicitando token federado a Quay..."
-
-          RESPONSE=$(curl -sS \
-            -w '\n%{http_code}' \
-            -u "$QUAY_ROBOT_USER:$OIDC_TOKEN" \
-            "https://quay.io/oauth2/federation/robot/token")
-
-          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-          BODY=$(echo "$RESPONSE" | sed '$d')
-
-          echo "HTTP: $HTTP_CODE"
-
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "Respuesta de Quay:"
-            echo "$BODY"
-            exit 1
-          fi
-
-          QUAY_TOKEN=$(echo "$BODY" | jq -r '.token')
-
-          test -n "$QUAY_TOKEN"
-          test "$QUAY_TOKEN" != "null"
-
-          echo "::add-mask::$QUAY_TOKEN"
-          echo "QUAY_TOKEN=$QUAY_TOKEN" >> "$GITHUB_ENV"
-
-          echo "Federación OIDC con Quay: OK"
-      
-      - name: Login en Quay
-        shell: bash
-        env:
-          QUAY_ROBOT_USER: odysseia+github_actions
-        run: |
-          set -euo pipefail
-
-          echo "$QUAY_TOKEN" | podman login quay.io \
-            --username "$QUAY_ROBOT_USER" \
-            --password-stdin
-
-      - name: Push de imagen a Quay
+      - name: Record artifact identity
         shell: bash
         run: |
           set -euo pipefail
+          image_id="$(podman inspect --format '{{.Id}}' "localhost/hello-service:${GITHUB_SHA}")"
+          jq -n --arg sha "$GITHUB_SHA" --arg image_id "$image_id" \
+            '{commit_sha: $sha, image_id: $image_id}' > artifact-metadata.json
+          cat artifact-metadata.json
 
-          podman push \
-            quay.io/odysseia/hello-service:${GITHUB_SHA}
-
-          podman push \
-            quay.io/odysseia/hello-service:latest
+      - uses: actions/upload-artifact@v4
+        with:
+          name: artifact-metadata
+          path: artifact-metadata.json
+          retention-days: 30
