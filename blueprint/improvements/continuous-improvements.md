@@ -6,6 +6,28 @@ Capture learnings from development and operation and convert them into
 future improvements to requirements, architecture, implementation and
 operational practices.
 
+## Scope Closure Record
+
+The following closure decisions are approved for the `hello-service` PoC. This record
+does not change requirements, acceptance criteria, ADRs, gates or the status of the
+improvement candidates below.
+
+| Item | Approved treatment | State after closure |
+|---|---|---|
+| Closure scope | PoC with CI and local deployment | Approved and retained |
+| Remote publication to Quay | Postponed | Approved; not completed |
+| Residual risk of `cd.yml` | Document the risk without modifying the workflow | Approved; workflow unchanged |
+| Independent review of `REQ-STATUS-001` | Required before closure | Pending — a non-independent review record exists in `blueprint/reviews/api-status-endpoint.md` |
+| Local execution | Retain the recorded execution evidence; do not invent an undocumented startup command | Evidence retained; reproducible procedure pending |
+| `CHANGELOG.md` | Do not create | Approved |
+| Blueprint formal validation | Do not claim validation | Remains `NOT VERIFIED` |
+| Gates P-02, P-06, P-07, P-10 and P-11 | Do not close because publication is postponed | Open or not verified |
+| IMP-001, IMP-002 and IMP-003 | Keep as `Deferred` | No change |
+
+Postponing remote publication is not evidence that publication was completed and does
+not close any gate. The gate identifiers P-02, P-06, P-07, P-10 and P-11 are defined in
+`blueprint/gates.md`.
+
 ## Feedback Sources
 
 | Source | Current Evidence | Action |
@@ -28,6 +50,8 @@ operational practices.
    not be introduced without a concrete requirement.
 4. The Blueprint lifecycle provides explicit feedback points for future
    changes.
+5. Configuration is evidence that a capability is wired, not that it ran. Closure
+   records must distinguish configuration, local execution and remote execution.
 
 ## Improvement Candidates
 
