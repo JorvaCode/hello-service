@@ -34,3 +34,15 @@ Deployment shall be repeatable and observable.
 
 ## Quality gate
 The post-deployment verification result for this deployment is recorded and passed, and the rollback path is either exercised or explicitly declared unavailable with a recovery path. A reviewer who did not perform the deployment reaches the same verdict on whether the target is in the intended state.
+
+## Deployment record — local 0.1.0
+
+The local deployment of `0.1.0` is recorded in
+`blueprint/deployment/local-0.1.0.md`. It records the environment, strategy,
+configuration, post-deployment verification and the exercised rollback to
+`0.0.1-SNAPSHOT`.
+
+The post-deployment verification passed and the rollback path was exercised. The
+deployment gate is closed with the solo-maintainer self-review recorded in
+`blueprint/reviews/delivery-closure.md`; it does not claim an independent approval. The
+deployment is scoped to the `local` environment; no remote publication is claimed.

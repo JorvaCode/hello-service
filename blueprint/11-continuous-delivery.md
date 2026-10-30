@@ -49,6 +49,10 @@ step:
   secret scan, version resolution, versioned image, identity record and artifact uploads
   passed. Artifacts: `artifact-metadata`, `hello-service-0.1.0` and `gitleaks-report`.
   Evidence: GitHub Actions run `41046888744`.
+- Local promotion: version `0.1.0` was promoted to the `local` environment on
+  2026-10-30. The release identity, checks, promotion result and rollback rehearsal are
+  recorded in `blueprint/delivery/release-0.1.0.md`; the deployment record is
+  `blueprint/deployment/local-0.1.0.md`.
 - CD and remote publication: no `cd.yml` execution, remote publication or remote digest
   has been verified in this closure.
 
@@ -60,9 +64,27 @@ step:
 - `cd.yml` contains a potential remote publication path through `push` and
   `workflow_dispatch`, including OIDC, registry login and image push. It is not modified
   by this closure and no execution or publication is claimed.
+- The local promotion of `0.1.0` is recorded and its rollback path was rehearsed. Remote
+  publication to Quay remains postponed and is not claimed.
 - The gate identifiers P-02, P-06, P-07, P-10 and P-11 are defined in `blueprint/gates.md`.
-- This section does not close CD-01, P-02, P-07 or P-11. The Quality gate above remains
-  applicable whenever a promotion actually occurs.
+- P-11 is closed with the local promotion evidence and a solo-maintainer self-approval;
+  the record does not claim an independent approval. P-02 remains open; P-07 is closed
+  with the same solo-maintainer limitation. The Quality gate above remains applicable to
+  any promotion, local or remote.
+
+## Local promotion record
+
+- Release: `0.1.0` at `870500c`.
+- Environment: `local` (single-node Podman on Windows/WSL).
+- Promotion result: local build green (17 tests), image built, container ran as `appuser`,
+  and smoke tests passed on `127.0.0.1:18080`.
+- Rollback: `0.0.1-SNAPSHOT` from `f2b03e5` was built, run and probed; `0.1.0` was
+  restored and probed again.
+- Records: `blueprint/delivery/release-0.1.0.md`,
+  `blueprint/deployment/local-0.1.0.md`.
+- Approval: self-review in `blueprint/reviews/delivery-closure.md`; no independent
+  reviewer exists. P-11 is closed with this self-approval and does not claim an
+  independent approval.
 
 ## Environments
 Common examples:
