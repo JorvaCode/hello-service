@@ -11,6 +11,55 @@ CI
   -> smoke tests
   -> promotion
 
+## External prerequisites (non-normative)
+
+This section describes external prerequisites referenced by `cd.yml`. It does not define
+a new gate, approve a promotion or assert that any prerequisite exists.
+
+### Prerequisites checked by the workflow configuration
+
+The workflow configuration contains explicit checks for these inputs:
+
+- GitHub repository variable `QUAY_NAMESPACE`.
+- GitHub repository variable `QUAY_AUTH`, defaulting to `oidc` when empty.
+- For `oidc`: GitHub repository variable `QUAY_ROBOT_USERNAME`.
+- For `robot`: GitHub Actions secrets `QUAY_USERNAME` and `QUAY_TOKEN`.
+
+The prerequisite step is written to exit with an explicit blocked message when one of
+those checked inputs is missing. This describes the workflow configuration only; no
+`cd.yml` run has been verified in this closure, so no runtime fail-safe behavior is
+claimed.
+
+### External conditions not verified
+
+The following conditions are expected but are not explicitly checked by the prerequisite
+step:
+
+- A Quay destination repository that exists and grants write permission to the selected
+  identity.
+- OIDC federation, or a robot credential, accepted by Quay.
+- A configured target environment for deployment and promotion.
+
+### Workflow execution status
+
+- CI: run 10 (`pull_request`) on commit `6ccd170` completed with `success`; every step
+  passed, including build and test, container image build, identity record and artifact
+  upload. Evidence: GitHub Actions run `41043812371`, artifact `artifact-metadata`.
+- CD and remote publication: no `cd.yml` execution, remote publication or remote digest
+  has been verified in this closure.
+
+### Current PoC boundary
+
+- Remote publication to Quay is postponed for the `hello-service` PoC.
+- `ci.yml` no longer contains a publication path: it builds, tests and records the image
+  identity only. No publication by that workflow is claimed.
+- `cd.yml` contains a potential remote publication path through `push` and
+  `workflow_dispatch`, including OIDC, registry login and image push. It is not modified
+  by this closure and no execution or publication is claimed.
+- The gate identifiers P-02, P-06, P-07, P-10 and P-11 are defined in `blueprint/gates.md`.
+- This section does not close CD-01, P-02, P-07, P-10 or P-11. The Quality gate above
+  remains applicable whenever a promotion actually occurs.
+
 ## Environments
 Common examples:
 - Development
