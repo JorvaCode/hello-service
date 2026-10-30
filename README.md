@@ -96,7 +96,7 @@ esa aprobación sigue pendiente y no debe presentarse como obtenida.
 
 | Área | Evidencia de configuración | Evidencia de ejecución real | Estado |
 |---|---|---|---|
-| CI | `.github/workflows/ci.yml` define un único job de build/test, construcción de la imagen y registro de su identidad; no contiene ruta de publicación | No hay evidencia en el repositorio de una ejecución real en GitHub Actions | Configuración presente; CI-02 `NO VERIFICADO` |
+| CI | `.github/workflows/ci.yml` define un único job de build/test, construcción de la imagen y registro de su identidad; no contiene ruta de publicación | Ejecución real registrada: run 10 sobre `6ccd170`, conclusión `success`, artefacto `artifact-metadata` | Configuración validada por ejecución real; CI-02 `VERIFICADO` |
 | Pruebas locales | Gradle Wrapper y suite automatizada | Ejecución registrada de 17 tests sobre `f2b03e5` y repetida sobre `72c2ad5` | Ejecución local documentada y repetida sobre el `HEAD` del cierre |
 | Despliegue local | `Dockerfile` OCI, usuario no-root, puerto `8080` y entrypoint del JAR | Probe local registrado en `127.0.0.1:18080` | Ejecución observada; procedimiento reproducible pendiente |
 | CD / Quay | `.github/workflows/cd.yml` contiene disparadores, pasos de OIDC, login y push a Quay | No hay evidencia de ejecución ni de publicación o digest remoto | Publicación remota pospuesta; ruta potencial conservada y riesgo documentado |
@@ -117,11 +117,11 @@ La publicación remota en Quay está pospuesta por decisión de alcance.
 - `REQ-STATUS-001` no tiene revisión independiente realizada.
 - El Blueprint permanece `NO VERIFICADO` en cuanto a validación formal.
 - No se crea release ni `CHANGELOG.md` en este cierre.
-- Los gates P-02, P-06, P-07, P-10 y P-11 permanecen abiertos o no verificados (definidos
-  en `blueprint/gates.md`).
+- Los gates P-02, P-07, P-10 y P-11 permanecen abiertos o no verificados; P-06 está
+  cerrado (definidos en `blueprint/gates.md`).
 - `cd.yml` mantiene una ruta potencial de publicación; el riesgo residual se documenta
   sin modificar el workflow.
-- No hay evidencia de una ejecución real de CI en GitHub.
+- La publicación remota y la promoción no tienen evidencia de ejecución.
 
 ## Documentación
 
