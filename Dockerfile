@@ -7,7 +7,7 @@
 # quedan vacías: no se hardcodea ningún repositorio.
 # Base: Eclipse Temurin JRE 21 (Ubuntu 26.04), fijada por digest para reproducibilidad.
 
-ARG APP_VERSION=0.0.1-SNAPSHOT
+ARG APP_VERSION=0.1.0
 
 FROM docker.io/library/eclipse-temurin:21-jre@sha256:49e21e16e3c86eb7816a44a67549910ed090fbeb40c29c525d58bf5e02e91b0f AS base
 
