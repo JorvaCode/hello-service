@@ -17,7 +17,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Request-id correlation filter (Phase 13 / ADR-011).
+ * Request-id correlation filter (Phase 13; see
+ * {@code blueprint/observability/hello-service.md}).
  *
  * For every request it binds a {@code requestId} into the SLF4J MDC under the
  * key {@code requestId} (consumed by logback-spring.xml) and echoes the same

@@ -22,9 +22,9 @@ improvement candidates below.
 | Local promotion and rollback | Record a local promotion of `0.1.0` and rehearse the rollback | Completed 2026-10-30 — `blueprint/delivery/release-0.1.0.md`; remote publication remains postponed |
 | `CHANGELOG.md` | Do not create | Approved |
 | Blueprint formal validation | Do not claim validation | Remains `NOT VERIFIED` |
-| Gates P-02, P-06, P-07, P-10 and P-11 | Do not close a gate without its evidence; record independence limitations | P-06, P-07, P-10 and P-11 closed; P-07 and P-11 closed with solo-maintainer self-review and no independent approval; P-02 not verified |
+| Gates P-02, P-06, P-07, P-10, P-11 and P-13 | Do not close a gate without its evidence; record independence limitations | P-06, P-07, P-10, P-11 and P-13 closed; P-07, P-11 and P-13 closed with solo-maintainer self-review and no independent approval; P-02 not verified |
 | Real CI execution | Record the successful GitHub Actions runs | Completed — run 10 on `6ccd170` and run 13 on `2e54476` concluded `success` |
-| IMP-001, IMP-002 and IMP-003 | Keep as `Deferred` | No change |
+| IMP-001 … IMP-005 | Keep as `Deferred` | No change |
 
 Postponing remote publication is not evidence that publication was completed and does
 not close any gate. The local promotion of `0.1.0` is recorded separately in
@@ -59,6 +59,8 @@ identifiers P-02, P-06, P-07, P-10 and P-11 are defined in `blueprint/gates.md`.
    approval and rollback are recorded; remote publication is a separate event.
 7. A single-maintainer repository can record the absence of an independent reviewer, but
    it cannot convert a self-review into an independent approval.
+8. Manual detection can satisfy a local PoC runbook, but it is not automated alerting; the
+   distinction must be recorded rather than implied.
 
 ## Improvement Candidates
 
@@ -102,6 +104,38 @@ in an environment requiring orchestration-level health probes.
 
 **Potential impact:**  
 Requirements, architecture, deployment and observability.
+
+**Status:** Deferred
+
+---
+
+### IMP-004 — Automated Alerting
+
+**Source:** Observability / phase 13
+
+**Description:**
+Evaluate an automated alerting path for the failure modes recorded in
+`blueprint/observability/hello-service.md` if the service is deployed beyond the local
+PoC. The current detection is manual; there is no paging path or dashboard.
+
+**Potential impact:**
+Observability, deployment and operating model.
+
+**Status:** Deferred
+
+---
+
+### IMP-005 — Request Access Logging
+
+**Source:** Observability / phase 13
+
+**Description:**
+Evaluate a request access log that records method, path, status and duration with the
+`requestId`, so successful and failed requests are correlated without relying on
+framework error logs. The current correlation is demonstrated on error paths only.
+
+**Potential impact:**
+Implementation, tests and log-injection review.
 
 **Status:** Deferred
 
