@@ -30,3 +30,16 @@ Requirement -> Design -> Build -> Test -> Deliver -> Operate -> Learn -> Improve
 
 ## Quality gate
 Every improvement item has an owner and names the artifact it changes, and every closure record states the evidence that the change took effect. An item that revises a requirement names the identifier it revises and the release that delivered the revision. A reviewer can trace each item back to the feedback that raised it, and each change back to an item, and reaches the same verdict on whether the loop closed.
+
+## Project record — local PoC
+
+The improvement register is `blueprint/improvements/continuous-improvements.md`. It records
+five owned improvement items, each with the artifact it would change and the feedback that
+raised it. All five remain `Deferred`; no requirement revision or release is claimed.
+
+The phase 14 gate is **CLOSED for the register/closure change with a limitation**: the
+register and closure record are complete, but the loops for `IMP-001` … `IMP-005` remain
+open. The review is a solo-maintainer self-review in
+`blueprint/reviews/continuous-improvement-closure.md`; it does not claim an independent
+approval. The change is recorded in `blueprint/changes/p14-continuous-improvement.md` and the
+gate in `blueprint/gates.md` (P-14).

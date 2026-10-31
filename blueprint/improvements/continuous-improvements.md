@@ -22,26 +22,28 @@ improvement candidates below.
 | Local promotion and rollback | Record a local promotion of `0.1.0` and rehearse the rollback | Completed 2026-10-30 — `blueprint/delivery/release-0.1.0.md`; remote publication remains postponed |
 | `CHANGELOG.md` | Do not create | Approved |
 | Blueprint formal validation | Do not claim validation | Remains `NOT VERIFIED` |
-| Gates P-02, P-06, P-07, P-10, P-11 and P-13 | Do not close a gate without its evidence; record independence limitations | P-06, P-07, P-10, P-11 and P-13 closed; P-07, P-11 and P-13 closed with solo-maintainer self-review and no independent approval; P-02 not verified |
-| Real CI execution | Record the successful GitHub Actions runs | Completed — run 10 on `6ccd170` and run 13 on `2e54476` concluded `success` |
-| IMP-001 … IMP-005 | Keep as `Deferred` | No change |
+| Gates P-02, P-06, P-07, P-10, P-11, P-13 and P-14 | Do not close a gate without its evidence; record independence limitations | P-06, P-07, P-10, P-11, P-13 and P-14 closed; P-07, P-11, P-13 and P-14 closed with solo-maintainer self-review and no independent approval; P-02 not verified |
+| Real CI execution | Record the successful GitHub Actions runs | Completed — run 10 on `6ccd170`, run 13 on `2e54476` and run 41220748392 on `0fbaffc` concluded `success` |
+| IMP-001 … IMP-005 | Keep as `Deferred` | No implementation; each item now names an owner, an artifact and its feedback source |
 
 Postponing remote publication is not evidence that publication was completed and does
 not close any gate. The local promotion of `0.1.0` is recorded separately in
 `blueprint/delivery/release-0.1.0.md` and does not claim a remote promotion. The gate
-identifiers P-02, P-06, P-07, P-10 and P-11 are defined in `blueprint/gates.md`.
+identifiers P-02, P-06, P-07, P-10, P-11, P-13 and P-14 are defined in
+`blueprint/gates.md`.
 
 ## Feedback Sources
 
 | Source | Current Evidence | Action |
 |---|---|---|
-| Incidents | No incidents observed | Continue monitoring |
-| Metrics | Basic HTTP behavior validated | Consider application metrics if operational complexity grows |
+| Incidents | No incidents observed | Continue monitoring; no improvement item raised |
+| Metrics | Phase 13 record: no metrics endpoint | Keep `IMP-001` deferred |
 | User feedback | No external user feedback available | Capture feedback when the service is consumed by users |
 | Retrospectives | Blueprint phases reviewed during implementation | Keep phase-by-phase review practice |
-| Technical debt | Minimal for current scope | Reassess if functionality expands |
-| Security findings | No known findings for current scope | Include security validation in future changes |
+| Technical debt | Phase 13 record: no access log and no automated alerting | Keep `IMP-004` and `IMP-005` deferred |
+| Security findings | CI runs gitleaks but no dependency vulnerability scan | Keep `IMP-002` deferred |
 | Performance findings | No performance issue identified | Reassess if traffic or processing complexity increases |
+| Operational feedback | Phase 13 record: no readiness probe | Keep `IMP-003` deferred |
 
 ## Learnings
 
@@ -61,57 +63,85 @@ identifiers P-02, P-06, P-07, P-10 and P-11 are defined in `blueprint/gates.md`.
    it cannot convert a self-review into an independent approval.
 8. Manual detection can satisfy a local PoC runbook, but it is not automated alerting; the
    distinction must be recorded rather than implied.
+9. An improvement item is traceable only when it names the feedback that raised it, the
+   artifact it would change and an owner; otherwise it is a wish.
 
 ## Improvement Candidates
 
 ### IMP-001 — Application Metrics
 
-**Source:** Metrics
+**Source:** Metrics feedback; `blueprint/observability/hello-service.md` records that no
+metrics endpoint exists.
 
-**Description:**  
-Evaluate adding application-level metrics if the service evolves beyond
-the current demonstration scope.
+**Owner:** Jorva (maintainer).
 
-**Potential impact:**  
+**Artifact changed:** `blueprint/requirements/` (new metrics requirement),
+`blueprint/architecture/`, `blueprint/observability/hello-service.md` and the deployment
+configuration.
+
+**Description:**
+Evaluate adding application-level metrics if the service evolves beyond the current
+demonstration scope.
+
+**Potential impact:**
 Requirements, observability design and deployment configuration.
 
-**Status:** Deferred
+**Status:** Deferred — no implementation; loop open.
 
 ---
 
 ### IMP-002 — Security Validation
 
-**Source:** Security findings
+**Source:** Security findings; `.github/workflows/ci.yml` runs a gitleaks secret scan but
+no dependency vulnerability scan.
 
-**Description:**  
-Evaluate adding automated security and dependency vulnerability checks to
-the CI pipeline.
+**Owner:** Jorva (maintainer).
 
-**Potential impact:**  
+**Artifact changed:** `.github/workflows/ci.yml`, `blueprint/09-continuous-integration.md`
+and `blueprint/packaging/hello-service.md`.
+
+**Description:**
+Evaluate adding automated security and dependency vulnerability checks to the CI pipeline.
+
+**Potential impact:**
 CI/CD and security validation.
 
-**Status:** Deferred
+**Status:** Deferred — no implementation; loop open.
 
 ---
 
 ### IMP-003 — Operational Health Checks
 
-**Source:** Operational feedback
+**Source:** Operational feedback; `blueprint/deployment/local-0.1.0.md` records no readiness
+probe and `blueprint/observability/hello-service.md` records readiness as not implemented.
 
-**Description:**  
-Evaluate dedicated health/readiness endpoints if the service is deployed
-in an environment requiring orchestration-level health probes.
+**Owner:** Jorva (maintainer).
 
-**Potential impact:**  
+**Artifact changed:** `blueprint/requirements/` (new readiness requirement or a revision of
+`REQ-STATUS-001`), `blueprint/architecture/api-status-endpoint.md`,
+`blueprint/deployment/local-0.1.0.md` and `blueprint/observability/hello-service.md`.
+
+**Description:**
+Evaluate dedicated health/readiness endpoints if the service is deployed in an environment
+requiring orchestration-level health probes.
+
+**Potential impact:**
 Requirements, architecture, deployment and observability.
 
-**Status:** Deferred
+**Status:** Deferred — no implementation; loop open.
 
 ---
 
 ### IMP-004 — Automated Alerting
 
-**Source:** Observability / phase 13
+**Source:** Observability feedback; `blueprint/observability/hello-service.md` records no
+automated alerting and `blueprint/reviews/observability-closure.md` F-2 records the manual
+detection limitation.
+
+**Owner:** Jorva (maintainer).
+
+**Artifact changed:** `blueprint/observability/hello-service.md`, the deployment/operating
+model and CI/CD configuration.
 
 **Description:**
 Evaluate an automated alerting path for the failure modes recorded in
@@ -121,13 +151,21 @@ PoC. The current detection is manual; there is no paging path or dashboard.
 **Potential impact:**
 Observability, deployment and operating model.
 
-**Status:** Deferred
+**Status:** Deferred — no implementation; loop open.
 
 ---
 
 ### IMP-005 — Request Access Logging
 
-**Source:** Observability / phase 13
+**Source:** Observability feedback; `blueprint/observability/hello-service.md` records no
+per-request access log and `blueprint/reviews/observability-closure.md` F-3 records the
+correlation limitation.
+
+**Owner:** Jorva (maintainer).
+
+**Artifact changed:** `src/main/java/com/example/hello/RequestIdFilter.java` or a new
+access-log component, its tests, `blueprint/observability/hello-service.md` and the security
+review of log injection.
 
 **Description:**
 Evaluate a request access log that records method, path, status and duration with the
@@ -137,7 +175,40 @@ framework error logs. The current correlation is demonstrated on error paths onl
 **Potential impact:**
 Implementation, tests and log-injection review.
 
-**Status:** Deferred
+**Status:** Deferred — no implementation; loop open.
+
+## Lifecycle Changes
+
+No normative phase document, standard, template or ADR is changed by this phase. The five
+improvement items are deferred and none revises a requirement. The project-specific phase
+records (`blueprint/14-continuous-improvement.md`, `blueprint/gates.md` and `README.md`) are
+updated to record this phase; that is not a change to the lifecycle's normative text. If an
+item is implemented, it enters the lifecycle at the phase named in its "Artifact changed"
+field and follows the normal requirement, design, test, review, delivery and deployment
+path.
+
+## Phase 14 Closure Record
+
+| Item | Change made | Evidence of effect | Requirement revision | Release |
+| --- | --- | --- | --- | --- |
+| Phase 14 register | Added an owner, named artifact, feedback evidence and closure state to `IMP-001` … `IMP-005`; added this lifecycle record and closure | `blueprint/reviews/continuous-improvement-closure.md`; local test run 2026-10-30T18:45:20Z (17 tests, 0 failures); phase 13 CI run 41220748392 (`success`) | None | None; `0.1.0` local release unchanged |
+| `IMP-001` … `IMP-005` | No implementation; all remain `Deferred` | No implementation evidence exists; each item's loop remains open | None | None |
+
+The closure record closes the phase 14 register change. It does not claim that any deferred
+improvement was delivered. The loops for `IMP-001` … `IMP-005` remain open by design.
+
+## Phase 14 Gate
+
+**State: CLOSED (register updated; all improvement items deferred; no requirement revision).**
+
+- Every improvement item names an owner and the artifact it changes.
+- Every item traces back to a named feedback source and its evidence.
+- The closure record states what changed and the evidence that it took effect.
+- No item revises a requirement, so no `FR-nn`/`NFR-nn` or release is named.
+- Limitation: the loops for `IMP-001` … `IMP-005` remain open; no improvement was
+  implemented in this phase.
+- Review: `blueprint/reviews/continuous-improvement-closure.md`; solo-maintainer
+  self-review, not independent approval.
 
 ## Feedback Loop
 
