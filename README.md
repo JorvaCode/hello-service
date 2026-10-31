@@ -16,9 +16,9 @@ local.
   una autoevaluación del mantenedor y no una aprobación independiente.
 - No se crea `CHANGELOG.md`.
 - El Blueprint no se declara formalmente validado.
-- Los gates se cierran solo con su evidencia: P-06, P-07, P-10 y P-11 están cerrados;
-  P-07 y P-11 registran autoevaluación del mantenedor porque no hay revisor independiente;
-  P-02 sigue abierto (ver `blueprint/gates.md`).
+- Los gates se cierran solo con su evidencia: P-06, P-07, P-10, P-11 y P-13 están
+  cerrados; P-07, P-11 y P-13 registran autoevaluación del mantenedor porque no hay
+  revisor independiente; P-02 sigue abierto (ver `blueprint/gates.md`).
 
 ## Qué es y relación con el Blueprint
 
@@ -107,6 +107,7 @@ esa aprobación sigue pendiente y no debe presentarse como obtenida.
 | Pruebas locales | Gradle Wrapper y suite automatizada | Ejecución registrada de 17 tests sobre `f2b03e5`, `72c2ad5` y `870500c` | Ejecución local documentada y repetida sobre el `HEAD` del cierre |
 | Despliegue local | `Dockerfile` OCI, usuario no-root, puerto `8080` y entrypoint del JAR | Procedimiento reproducible verificado el 2026-10-30: build local, imagen `0.1.0`, contenedor como `appuser`, probes en `127.0.0.1:18080` y rollback a `0.0.1-SNAPSHOT` | Procedimiento verificado; registro en `blueprint/deployment/local-0.1.0.md` |
 | Release local / P-11 | Versión `0.1.0`, imagen local y rollback a `0.0.1-SNAPSHOT` | Promoción local registrada el 2026-10-30; rollback ejercitado | P-11 `CLOSED` con autoevaluación; sin aprobación independiente |
+| Observabilidad / P-13 | Logs estructurados con `requestId`, `/api/status` liveness y runbook manual; sin métricas, trazas ni alertas automatizadas | Registro en `blueprint/observability/hello-service.md`; prueba de correlación y runbook el 2026-10-30; 17 tests verdes en la revisión | P-13 `CLOSED` con detección manual; sin aprobación independiente |
 | CD / Quay | `.github/workflows/cd.yml` contiene disparadores, pasos de OIDC, login y push a Quay | No hay evidencia de ejecución ni de publicación o digest remoto | Publicación remota pospuesta; ruta potencial conservada y riesgo documentado |
 
 ## Publicación remota pospuesta
@@ -120,6 +121,22 @@ como publicación remota.
 - `cd.yml` contiene una ruta potencial de publicación mediante `push` a `main` y
   `workflow_dispatch`; no se modifica en este cierre.
 - No se declara una publicación realizada ni un digest remoto.
+
+## Observabilidad
+
+El registro de observabilidad de la PoC local está en
+`blueprint/observability/hello-service.md`. Documenta el contexto de operación, los logs
+estructurados, la correlación por `X-Request-ID`, la señal de liveness `/api/status`, siete
+modos de fallo y un runbook con ocho procedimientos.
+
+- La detección es manual: no hay alertas automatizadas, métricas, trazas ni readiness probe.
+- La correlación se verificó en una ruta de error (`POST /api/hello` -> `405`) con
+  `X-Request-ID: p13-correlation-test`; el mismo valor aparece en la cabecera de respuesta y
+  en el log.
+- El runbook cubre arranque, liveness, contrato, `5xx`, conflicto de puerto, correlación y
+  rollback a `0.0.1-SNAPSHOT`.
+- La revisión es una autoevaluación del mantenedor en
+  `blueprint/reviews/observability-closure.md`; no es una aprobación independiente.
 
 ## Limitaciones conocidas
 
@@ -135,7 +152,10 @@ como publicación remota.
   sin modificar el workflow.
 - La publicación remota no tiene evidencia de ejecución. La promoción local de `0.1.0`
   sí está registrada y su rollback fue ejercitado.
-- No hay readiness probe ni despliegue en staging o producción.
+- No hay readiness probe ni despliegue en staging o producción; `/api/status` es una señal
+  de liveness.
+- No hay alertas automatizadas, métricas, trazas ni access log por petición; la detección de
+  la fase 13 es manual y el runbook está en `blueprint/observability/hello-service.md`.
 
 ## Documentación
 
@@ -147,10 +167,14 @@ como publicación remota.
 - [Packaging](blueprint/packaging/hello-service.md)
 - [Release 0.1.0](blueprint/delivery/release-0.1.0.md)
 - [Despliegue local 0.1.0](blueprint/deployment/local-0.1.0.md)
+- [Observabilidad local](blueprint/observability/hello-service.md)
+- [Revisión de observabilidad](blueprint/reviews/observability-closure.md)
+- [Cambio de observabilidad](blueprint/changes/p13-observability.md)
 - [Revisión del cierre de entrega](blueprint/reviews/delivery-closure.md)
 - [Gates de cierre](blueprint/gates.md)
 - [Blueprint — Continuous Delivery](blueprint/11-continuous-delivery.md)
 - [Blueprint — Deployment](blueprint/12-deployment.md)
+- [Blueprint — Observability](blueprint/13-observability.md)
 - [Definición de terminado](standards/definition-of-done.md)
 - [Mejoras continuas](blueprint/improvements/continuous-improvements.md)
 - [Workflow CI](.github/workflows/ci.yml)
