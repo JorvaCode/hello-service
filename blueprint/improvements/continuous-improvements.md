@@ -17,17 +17,19 @@ improvement candidates below.
 | Closure scope | PoC with CI and local deployment | Approved and retained |
 | Remote publication to Quay | Postponed | Approved; not completed |
 | Residual risk of `cd.yml` | Document the risk without modifying the workflow | Approved; workflow unchanged |
-| Independent review of `REQ-STATUS-001` | Required before closure | Pending — a non-independent review record exists in `blueprint/reviews/api-status-endpoint.md` |
-| Local execution | Retain the recorded execution evidence; do not invent an undocumented startup command | Evidence retained; reproducible procedure pending |
+| Independent review of `REQ-STATUS-001` | Record the absence of an independent reviewer; do not claim independent approval | Not performed — a non-independent review record exists in `blueprint/reviews/api-status-endpoint.md`; the delivery closure has a self-review in `blueprint/reviews/delivery-closure.md` |
+| Local execution | Verify and document a reproducible startup procedure | Completed 2026-10-30 — procedure and evidence in `blueprint/deployment/local-0.1.0.md` and `README.md` |
+| Local promotion and rollback | Record a local promotion of `0.1.0` and rehearse the rollback | Completed 2026-10-30 — `blueprint/delivery/release-0.1.0.md`; remote publication remains postponed |
 | `CHANGELOG.md` | Do not create | Approved |
 | Blueprint formal validation | Do not claim validation | Remains `NOT VERIFIED` |
-| Gates P-02, P-06, P-07, P-10 and P-11 | Do not close because publication is postponed | P-02, P-07 and P-11 remain open or not verified; P-06 and P-10 are closed by recorded evidence |
-| Real CI execution | Record the first successful GitHub Actions run | Completed - run 10 on `6ccd170` concluded `success` |
+| Gates P-02, P-06, P-07, P-10 and P-11 | Do not close a gate without its evidence; record independence limitations | P-06, P-07, P-10 and P-11 closed; P-07 and P-11 closed with solo-maintainer self-review and no independent approval; P-02 not verified |
+| Real CI execution | Record the successful GitHub Actions runs | Completed — run 10 on `6ccd170` and run 13 on `2e54476` concluded `success` |
 | IMP-001, IMP-002 and IMP-003 | Keep as `Deferred` | No change |
 
 Postponing remote publication is not evidence that publication was completed and does
-not close any gate. The gate identifiers P-02, P-06, P-07, P-10 and P-11 are defined in
-`blueprint/gates.md`.
+not close any gate. The local promotion of `0.1.0` is recorded separately in
+`blueprint/delivery/release-0.1.0.md` and does not claim a remote promotion. The gate
+identifiers P-02, P-06, P-07, P-10 and P-11 are defined in `blueprint/gates.md`.
 
 ## Feedback Sources
 
@@ -53,6 +55,10 @@ not close any gate. The gate identifiers P-02, P-06, P-07, P-10 and P-11 are def
    changes.
 5. Configuration is evidence that a capability is wired, not that it ran. Closure
    records must distinguish configuration, local execution and remote execution.
+6. A local promotion is a real promotion only when the artifact identity, checks,
+   approval and rollback are recorded; remote publication is a separate event.
+7. A single-maintainer repository can record the absence of an independent reviewer, but
+   it cannot convert a self-review into an independent approval.
 
 ## Improvement Candidates
 
