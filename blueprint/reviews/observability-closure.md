@@ -94,7 +94,7 @@ is not an independent review.
 ### 10. No unnecessary scope?
 
 - The change adds no metrics, traces, dashboards, automated alerting or readiness probe.
-- Remote publication remains postponed and is not claimed.
+- Remote publication was completed after this review; see the post-closure update below.
 - The only code edit corrects stale ADR citations; it does not change behaviour.
 
 ## Findings
@@ -114,6 +114,13 @@ is not an independent review.
 Approved for the local observability scope on the recorded evidence. Every failure mode has
 a detection check, a response and a runbook step; every finding has a disposition.
 Independent approval remains unavailable.
+
+## Post-closure update (2026-11-01)
+
+Remote publication was completed by `cd.yml` run 41332436297 on `c7d3a86`; see
+`blueprint/changes/p11-remote-publication.md`. The observability scope is still local and
+manual; the remote publication did not add automated alerting, metrics, traces or a
+readiness probe. Phase 13 CI run 41220748392 later concluded `success`.
 
 ## Reviewer, independence and date
 

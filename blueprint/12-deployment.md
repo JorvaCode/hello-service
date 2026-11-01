@@ -44,5 +44,20 @@ configuration, post-deployment verification and the exercised rollback to
 
 The post-deployment verification passed and the rollback path was exercised. The
 deployment gate is closed with the solo-maintainer self-review recorded in
-`blueprint/reviews/delivery-closure.md`; it does not claim an independent approval. The
-deployment is scoped to the `local` environment; no remote publication is claimed.
+`blueprint/reviews/delivery-closure.md`; it does not claim an independent approval. This
+record covers the `local` environment.
+
+## Remote deployment record — 0.1.0
+
+On 2026-11-01, `cd.yml` run 41332436297 on `c7d3a86` published
+`quay.io/odysseia/hello-service:0.1.0@sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`
+and deployed it by digest to a Podman container on the GitHub Actions runner. The
+post-deployment smoke test `GET /api/hello` returned `200`, `text/plain;charset=UTF-8`,
+`Hello, World!`.
+
+The promotion mechanism was prepared for the same digest, but no second environment was
+configured, so end-to-end promotion was not executed. A remote rollback was not exercised;
+no previous remote release is recorded. The local deployment and rollback record remains
+`blueprint/deployment/local-0.1.0.md`. The remote event is recorded in
+`blueprint/changes/p11-remote-publication.md` and reviewed in
+`blueprint/reviews/remote-publication.md`.

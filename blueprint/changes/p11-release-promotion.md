@@ -51,3 +51,10 @@ so rollback is a container replacement. Evidence: `blueprint/delivery/release-0.
 
 ## Deletions
 None.
+
+## Post-closure update (2026-11-01)
+
+The local promotion described above is unchanged. After the phase 14 merge, `cd.yml` run
+41332436297 published `0.1.0` to Quay and deployed it by digest; see
+`blueprint/changes/p11-remote-publication.md`. The remote publication is a separate event,
+not part of this local promotion.

@@ -47,3 +47,9 @@ Exercised on 2026-10-30. Details and identity of the target:
 
 ## Deletions
 None.
+
+## Post-closure update (2026-11-01)
+
+The local deployment described above is unchanged. Remote publication was completed after
+this record by `cd.yml` run 41332436297; see
+`blueprint/changes/p11-remote-publication.md`.
