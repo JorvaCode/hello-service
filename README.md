@@ -16,9 +16,9 @@ local.
   una autoevaluación del mantenedor y no una aprobación independiente.
 - No se crea `CHANGELOG.md`.
 - El Blueprint no se declara formalmente validado.
-- Los gates se cierran solo con su evidencia: P-06, P-07, P-10, P-11 y P-13 están
-  cerrados; P-07, P-11 y P-13 registran autoevaluación del mantenedor porque no hay
-  revisor independiente; P-02 sigue abierto (ver `blueprint/gates.md`).
+- Los gates se cierran solo con su evidencia: P-06, P-07, P-10, P-11, P-13 y P-14
+  están cerrados; P-07, P-11, P-13 y P-14 registran autoevaluación del mantenedor porque
+  no hay revisor independiente; P-02 sigue abierto (ver `blueprint/gates.md`).
 
 ## Qué es y relación con el Blueprint
 
@@ -108,6 +108,7 @@ esa aprobación sigue pendiente y no debe presentarse como obtenida.
 | Despliegue local | `Dockerfile` OCI, usuario no-root, puerto `8080` y entrypoint del JAR | Procedimiento reproducible verificado el 2026-10-30: build local, imagen `0.1.0`, contenedor como `appuser`, probes en `127.0.0.1:18080` y rollback a `0.0.1-SNAPSHOT` | Procedimiento verificado; registro en `blueprint/deployment/local-0.1.0.md` |
 | Release local / P-11 | Versión `0.1.0`, imagen local y rollback a `0.0.1-SNAPSHOT` | Promoción local registrada el 2026-10-30; rollback ejercitado | P-11 `CLOSED` con autoevaluación; sin aprobación independiente |
 | Observabilidad / P-13 | Logs estructurados con `requestId`, `/api/status` liveness y runbook manual; sin métricas, trazas ni alertas automatizadas | Registro en `blueprint/observability/hello-service.md`; prueba de correlación y runbook el 2026-10-30; 17 tests verdes en la revisión | P-13 `CLOSED` con detección manual; sin aprobación independiente |
+| Mejora continua / P-14 | Registro de mejoras con propietario, artefacto y fuente de feedback; `IMP-001` … `IMP-005` diferidos | Registro y cierre en `blueprint/improvements/continuous-improvements.md`; revisión en `blueprint/reviews/continuous-improvement-closure.md` | P-14 `CLOSED` para el registro; bucles de mejora abiertos; sin aprobación independiente |
 | CD / Quay | `.github/workflows/cd.yml` contiene disparadores, pasos de OIDC, login y push a Quay | No hay evidencia de ejecución ni de publicación o digest remoto | Publicación remota pospuesta; ruta potencial conservada y riesgo documentado |
 
 ## Publicación remota pospuesta
@@ -138,6 +139,21 @@ modos de fallo y un runbook con ocho procedimientos.
 - La revisión es una autoevaluación del mantenedor en
   `blueprint/reviews/observability-closure.md`; no es una aprobación independiente.
 
+## Mejora continua
+
+El registro de mejora continua está en
+`blueprint/improvements/continuous-improvements.md`. Cada uno de los cinco items
+(`IMP-001` … `IMP-005`) nombra un propietario, el artefacto que cambiaría y la fuente de
+feedback que lo originó.
+
+- Los cinco items siguen `Deferred`; no se implementó ninguno en esta fase.
+- No hay revisión de requisito ni release nuevo; `0.1.0` sigue siendo el release local
+  entregado.
+- El cierre de la fase 14 está en el registro y en
+  `blueprint/reviews/continuous-improvement-closure.md`; es una autoevaluación del
+  mantenedor, no una aprobación independiente.
+- Los bucles de mejora de `IMP-001` … `IMP-005` permanecen abiertos.
+
 ## Limitaciones conocidas
 
 - `REQ-STATUS-001` no tiene revisión independiente realizada; la revisión de entrega es
@@ -145,9 +161,9 @@ modos de fallo y un runbook con ocho procedimientos.
 - El Blueprint permanece `NO VERIFICADO` en cuanto a validación formal.
 - No se crea `CHANGELOG.md`; el registro de release es
   `blueprint/delivery/release-0.1.0.md`.
-- P-02 permanece abierto; P-06, P-07, P-10 y P-11 están cerrados; P-07 y P-11 registran
-  autoevaluación del mantenedor y no una aprobación independiente (definidos en
-  `blueprint/gates.md`).
+- P-02 permanece abierto; P-06, P-07, P-10, P-11, P-13 y P-14 están cerrados; P-07, P-11,
+  P-13 y P-14 registran autoevaluación del mantenedor y no una aprobación independiente
+  (definidos en `blueprint/gates.md`).
 - `cd.yml` mantiene una ruta potencial de publicación; el riesgo residual se documenta
   sin modificar el workflow.
 - La publicación remota no tiene evidencia de ejecución. La promoción local de `0.1.0`
@@ -156,6 +172,8 @@ modos de fallo y un runbook con ocho procedimientos.
   de liveness.
 - No hay alertas automatizadas, métricas, trazas ni access log por petición; la detección de
   la fase 13 es manual y el runbook está en `blueprint/observability/hello-service.md`.
+- Los items de mejora `IMP-001` … `IMP-005` siguen diferidos; sus bucles de mejora no están
+  cerrados y no se declara ninguna mejora entregada.
 
 ## Documentación
 
@@ -177,6 +195,9 @@ modos de fallo y un runbook con ocho procedimientos.
 - [Blueprint — Observability](blueprint/13-observability.md)
 - [Definición de terminado](standards/definition-of-done.md)
 - [Mejoras continuas](blueprint/improvements/continuous-improvements.md)
+- [Revisión de mejora continua](blueprint/reviews/continuous-improvement-closure.md)
+- [Cambio de mejora continua](blueprint/changes/p14-continuous-improvement.md)
+- [Blueprint — Feedback and Continuous Improvement](blueprint/14-continuous-improvement.md)
 - [Workflow CI](.github/workflows/ci.yml)
 - [Workflow CD](.github/workflows/cd.yml)
 - [Dockerfile](Dockerfile)
