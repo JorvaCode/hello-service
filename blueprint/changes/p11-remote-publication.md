@@ -7,7 +7,7 @@
 | Change ID | `CHG-DEL-003` |
 | Date | 2026-11-01 |
 | Owner | Jorva (maintainer) |
-| Status | Implemented and self-reviewed; operational trigger check pending merge |
+| Status | Implemented and verified; self-reviewed |
 | Related gates | P-11 (delivery) |
 | Related requirements | `REQ-HELLO-001`, `REQ-STATUS-001` |
 | Trigger | Merge of PR #5 (`195d40c`) into `main` (`c7d3a86`); merge of PR #6 (`b52b71e`) into `main` (`21772cc`) after a disable attempt |
@@ -82,9 +82,8 @@ masked by the workflow.
 - The `image-digest` artifact for run 41334455398 contains
   `quay.io/odysseia/hello-service:0.1.0@sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17`.
 - `cd.yml` now has no `push` trigger; the only trigger is `workflow_dispatch`.
-- The merge of this change is the operational check: the push event must not create a CD
-  run because the merge commit contains the manual-only trigger. If a CD run appears, this
-  record is invalid and must be corrected.
+- The merge commit `4a79c6d` contains the manual-only trigger. The push to `main` created
+  CI run `41336511334` and no CD run; the manual-only control is verified.
 - The first remote image was built from `c7d3a86`; the second from `21772cc`. The local
   release artifact was built from `870500c`. The three builds are separate artifacts of
   version `0.1.0`; the local build is identified by an image ID and the remote builds by
