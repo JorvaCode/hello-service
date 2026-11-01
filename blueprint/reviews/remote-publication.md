@@ -15,9 +15,10 @@
 
 Checklist: `blueprint/07-code-review.md`.
 
-Evidence: CI runs 41332436321 and 41334455181; CD runs 41332436297 and 41334455398;
-the CD `image-digest` artifacts; the CD smoke tests; the local release and rollback records
-at `870500c`.
+Evidence: CI runs 41332436321, 41334455181 and 41336511334; CD runs 41332436297 and
+41334455398; the CD `image-digest` artifacts; the CD smoke tests; the local release and
+rollback records at `870500c`. The merge commit `4a79c6d` produced CI run 41336511334 and
+no CD run.
 
 This review is a self-review by the same agent that produced the remote-publication
 records. It is not an independent review.
@@ -68,6 +69,8 @@ records. It is not an independent review.
   digest format before publishing. Both runs exercised the success path.
 - The API disable switch did not prevent the second push-triggered run. The trigger change
   is the reliable control; the failed disable attempt is recorded as a limitation.
+- The merge of the trigger change produced CI run `41336511334` on `4a79c6d` and no CD
+  run, verifying the manual-only control.
 - No new application error path is introduced.
 
 ### 7. Security and sensitive data?
@@ -114,9 +117,11 @@ records. It is not an independent review.
 ## Verdict
 
 Approved for the corrected remote-publication records and the manual-only CD policy on the
-recorded evidence. Every finding has a disposition. Both remote images, digests, source
-commits and smoke results are traceable; the mutable-tag, failed-disable, remote-rollback
-and remote-status limitations are explicit. Independent approval remains unavailable.
+recorded evidence. The manual-only trigger is verified by merge commit `4a79c6d`, which
+produced CI run `41336511334` and no CD run. Every finding has a disposition. Both remote
+images, digests, source commits and smoke results are traceable; the mutable-tag,
+failed-disable, remote-rollback and remote-status limitations are explicit. Independent
+approval remains unavailable.
 
 ## Reviewer, independence and date
 
