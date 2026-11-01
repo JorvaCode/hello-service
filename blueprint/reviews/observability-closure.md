@@ -117,10 +117,11 @@ Independent approval remains unavailable.
 
 ## Post-closure update (2026-11-01)
 
-Remote publication was completed by `cd.yml` run 41332436297 on `c7d3a86`; see
-`blueprint/changes/p11-remote-publication.md`. The observability scope is still local and
-manual; the remote publication did not add automated alerting, metrics, traces or a
-readiness probe. Phase 13 CI run 41220748392 later concluded `success`.
+Remote publications were completed by `cd.yml` runs 41332436297 on `c7d3a86` and
+41334455398 on `21772cc`; see `blueprint/changes/p11-remote-publication.md`. The
+observability scope is still local and manual; the remote publications did not add
+automated alerting, metrics, traces or a readiness probe. Phase 13 CI run 41220748392 later
+concluded `success`.
 
 ## Reviewer, independence and date
 

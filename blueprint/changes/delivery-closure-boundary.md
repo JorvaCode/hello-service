@@ -59,7 +59,8 @@ None.
 
 ## Post-closure update (2026-11-01)
 
-`cd.yml` executed on `c7d3a86` and published `0.1.0` to Quay; see
+`cd.yml` executed on `c7d3a86` and `21772cc` and published `0.1.0` to Quay twice; see
 `blueprint/changes/p11-remote-publication.md`. The boundary that keeps publication in
-`cd.yml` is unchanged; the postponed state recorded here is superseded by the recorded
-execution.
+`cd.yml` remains, but the automatic `push` trigger was removed after the second
+publication; publication now requires `workflow_dispatch`. The postponed state recorded
+here is superseded by the recorded executions.

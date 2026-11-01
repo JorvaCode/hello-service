@@ -52,6 +52,7 @@ None.
 
 ## Post-closure update (2026-11-01)
 
-The README now records the remote publication of `0.1.0` by `cd.yml` run 41332436297; see
+The README now records the remote publications of `0.1.0` by `cd.yml` runs 41332436297 and
+41334455398, the current digest and the manual-only trigger; see
 `blueprint/changes/p11-remote-publication.md`. The "postponed remote publication" wording
-in the original README change is superseded by that result.
+in the original README change is superseded by those results.

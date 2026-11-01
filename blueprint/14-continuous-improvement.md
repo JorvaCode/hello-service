@@ -46,7 +46,9 @@ approval. The change is recorded in `blueprint/changes/p14-continuous-improvemen
 gate in `blueprint/gates.md` (P-14).
 
 Post-closure update (2026-11-01): merging PR #5 triggered `cd.yml` on `c7d3a86`; run
-41332436297 published `0.1.0` to Quay and deployed it by digest. This is a delivery event
-recorded in `blueprint/changes/p11-remote-publication.md`, not a phase 14 improvement
-implementation. The five improvement items remain `Deferred` and the phase 14 gate remains
-closed for the register.
+41332436297 published `0.1.0` to Quay and deployed it by digest. Merging PR #6 on
+`21772cc` triggered run 41334455398, which published a second digest and superseded the
+first. `cd.yml` now requires `workflow_dispatch`; automatic push publication is disabled.
+These are delivery events recorded in `blueprint/changes/p11-remote-publication.md`, not
+phase 14 improvement implementations. The five improvement items remain `Deferred` and the
+phase 14 gate remains closed for the register.

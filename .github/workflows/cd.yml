@@ -4,9 +4,14 @@ name: CD
 # Implements blueprint/11-continuous-delivery.md + ADR-009 (OCI + Podman) + ADR-010 (Quay.io).
 #
 # Flow:
-#   validated commit -> CI gates -> OCI image -> Quay.io -> digest (immutable identity)
-#   -> deploy by digest -> smoke GET /api/hello -> promotion mechanism prepared (SAME digest,
-#   NO podman build). End-to-end promotion runs only once the target environment is configured.
+#   manually dispatched validated commit -> CI gates -> OCI image -> Quay.io -> digest
+#   (immutable identity) -> deploy by digest -> smoke GET /api/hello -> promotion mechanism
+#   prepared (SAME digest, NO podman build). End-to-end promotion runs only once the target
+#   environment is configured.
+#
+# Automatic publication on push to main is disabled after the post-closure incident
+# documented in blueprint/changes/p11-remote-publication.md. Publication now requires an
+# explicit workflow_dispatch on the commit to publish.
 #
 # ADR-010 authentication:
 #   1) Preferred  : OIDC/keyless via Quay robot-account federation (GitHub OIDC issuer).
@@ -15,8 +20,6 @@ name: CD
 # (see "External prerequisites" in blueprint/11-continuous-delivery.md).
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch: {}
 
 permissions:
