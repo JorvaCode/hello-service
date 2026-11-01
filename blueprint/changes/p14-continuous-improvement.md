@@ -87,7 +87,9 @@ None.
 
 Merging this change to `main` (`c7d3a86`) triggered `cd.yml` run 41332436297. The workflow
 published
-`quay.io/odysseia/hello-service:0.1.0@sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`,
-deployed it by digest and passed the smoke test. The phase 14 register and the deferred
-improvement items are unchanged. The remote publication is recorded in
+`quay.io/odysseia/hello-service:0.1.0@sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b` (superseded),
+deployed it by digest and passed the smoke test. Merging the correction on `21772cc`
+triggered run 41334455398, which published the current digest and superseded the first;
+`cd.yml` now requires `workflow_dispatch`. The phase 14 register and the deferred
+improvement items are unchanged. The remote publications are recorded in
 `blueprint/changes/p11-remote-publication.md`.

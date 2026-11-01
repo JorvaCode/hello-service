@@ -50,6 +50,7 @@ None.
 
 ## Post-closure update (2026-11-01)
 
-The local deployment described above is unchanged. Remote publication was completed after
-this record by `cd.yml` run 41332436297; see
+The local deployment described above is unchanged. Remote publications were completed
+after this record by `cd.yml` runs 41332436297 and 41334455398; the second superseded the
+first and `cd.yml` now requires `workflow_dispatch`. See
 `blueprint/changes/p11-remote-publication.md`.

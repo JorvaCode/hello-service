@@ -53,24 +53,30 @@ step:
   2026-10-30. The release identity, checks, promotion result and rollback rehearsal are
   recorded in `blueprint/delivery/release-0.1.0.md`; the deployment record is
   `blueprint/deployment/local-0.1.0.md`.
-- Remote publication: merging PR #5 pushed `c7d3a86` to `main` on 2026-11-01 and triggered
-  `cd.yml`. Run 41332436297 succeeded, published
-  `quay.io/odysseia/hello-service:0.1.0@sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`,
-  deployed it by digest and passed the smoke test. The earlier statement that no `cd.yml`
-  execution had occurred is superseded by `blueprint/changes/p11-remote-publication.md`.
+- Remote publications: merging PR #5 pushed `c7d3a86` to `main` on 2026-11-01 and triggered
+  `cd.yml`; run 41332436297 published
+  `quay.io/odysseia/hello-service:0.1.0@sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`
+  and deployed it by digest. Merging PR #6 pushed `21772cc` and triggered run 41334455398,
+  which published
+  `quay.io/odysseia/hello-service:0.1.0@sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17`
+  and superseded the first digest. Automatic push publication is now disabled; `cd.yml`
+  requires `workflow_dispatch`. The earlier statement that no `cd.yml` execution had
+  occurred is superseded by `blueprint/changes/p11-remote-publication.md`.
 
 ### Current PoC boundary
 
-- Remote publication to Quay was completed for `0.1.0` on 2026-11-01; see
-  `blueprint/changes/p11-remote-publication.md`. Promotion to a second environment is not
-  executed.
+- Remote publications to Quay were completed for `0.1.0` on 2026-11-01; the current digest
+  is
+  `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17`;
+  see `blueprint/changes/p11-remote-publication.md`. Promotion to a second environment is
+  not executed.
 - `ci.yml` no longer contains a publication path: it builds, tests and records the image
   identity only. No publication by that workflow is claimed.
-- `cd.yml` contains the remote publication path through `push` and `workflow_dispatch`,
-  including OIDC, registry login and image push. It executed on `c7d3a86`; the workflow
-  itself is not modified by this record.
+- `cd.yml` contains the remote publication path through `workflow_dispatch`, including
+  OIDC, registry login and image push. The automatic `push` trigger is removed after two
+  post-closure publications; publication requires an explicit dispatch.
 - The local promotion of `0.1.0` is recorded and its rollback path was rehearsed. The
-  remote publication is recorded separately and the tag `0.1.0` remains mutable.
+  remote publications are recorded separately and the tag `0.1.0` remains mutable.
 - The gate identifiers P-02, P-06, P-07, P-10 and P-11 are defined in `blueprint/gates.md`.
 - P-11 is closed with the local promotion and remote publication evidence and a
   solo-maintainer self-approval; the record does not claim an independent approval. P-02
@@ -91,24 +97,27 @@ step:
   reviewer exists. P-11 is closed with this self-approval and does not claim an
   independent approval.
 
-## Remote publication record
+## Remote publication records
 
-- Release: `0.1.0` built from `c7d3a86` (merge commit of PR #5).
-- Environment: GitHub Actions runner, deploying by digest to a Podman container on the
-  runner; no staging or production target.
-- Registry: `quay.io/odysseia/hello-service:0.1.0`.
-- Digest:
-  `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`.
-- Auth mode: `oidc`.
-- Promotion result: image published, deployed by digest and smoke-tested
-  (`GET /api/hello` -> `200`, `text/plain;charset=UTF-8`, `Hello, World!`).
-- Promotion mechanism: prepared for the same digest; no second environment was configured,
-  so end-to-end promotion was not executed.
-- Rollback: not exercised for the remote environment; no previous remote release is
-  recorded. The local rollback remains exercised.
-- Records: `blueprint/changes/p11-remote-publication.md`,
-  `blueprint/reviews/remote-publication.md`.
-- Approval: solo-maintainer self-review; no independent approval is claimed.
+Two publications of `0.1.0` were executed on 2026-11-01:
+
+| Field | First | Second (current) |
+| --- | --- | --- |
+| Source commit | `c7d3a86b04e7b39a8ccfa55c37c8ae2c3dc4c2c0` | `21772ccb0012c36e2264ede3171758ddfd773525` |
+| CI run | 41332436321 (`success`) | 41334455181 (`success`) |
+| CD run | 41332436297 (`success`) | 41334455398 (`success`) |
+| Digest | `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b` (superseded) | `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17` |
+| Environment | GitHub Actions runner, Podman by digest; no staging or production target | Same |
+| Registry | `quay.io/odysseia/hello-service:0.1.0` | Same |
+| Auth mode | `oidc` | `oidc` |
+| Promotion result | Published, deployed by digest and smoke-tested | Published, deployed by digest and smoke-tested |
+| Promotion mechanism | Prepared for the same digest; no second environment configured | Prepared for the same digest; no second environment configured |
+| Rollback | Not exercised; no previous remote release recorded | Not exercised; no previous remote release recorded |
+| Records | `blueprint/changes/p11-remote-publication.md`, `blueprint/reviews/remote-publication.md` | Same |
+| Approval | Solo-maintainer self-review; no independent approval | Solo-maintainer self-review; no independent approval |
+
+The tag `0.1.0` is mutable and currently points to the second digest. Automatic push
+publication is disabled; publication requires `workflow_dispatch`.
 
 ## Environments
 Common examples:

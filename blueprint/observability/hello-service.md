@@ -9,12 +9,12 @@
 | Traffic profile | Manual smoke tests only; no production users, no scheduled traffic |
 | Operating model | Single maintainer; no on-call rotation, no paging service, no dashboards |
 | Normal state | Container `Up`; `GET /api/hello` -> `200` `Hello, World!`; `GET /api/status` -> `200` `{"status":"UP"}`; startup log lines present |
-| Scope boundary | Local PoC; remote publication of `0.1.0` was completed on 2026-11-01 by CD run 41332436297 (`quay.io/odysseia/hello-service@sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`); observability remains local and manual |
+| Scope boundary | Local PoC; remote publications of `0.1.0` were completed on 2026-11-01 by CD runs 41332436297 and 41334455398 (current digest `quay.io/odysseia/hello-service@sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17`); observability remains local and manual |
 
 The phase 13 signals are evaluated against this context. The PoC has no production
 operating context, so detection is manual and the runbook is the response path. This record
-does not claim an automated monitoring system. The remote publication of `0.1.0` is
-recorded in `blueprint/changes/p11-remote-publication.md`; it did not add observability
+does not claim an automated monitoring system. The remote publications of `0.1.0` are
+recorded in `blueprint/changes/p11-remote-publication.md`; they did not add observability
 instrumentation.
 
 ## Instrumentation

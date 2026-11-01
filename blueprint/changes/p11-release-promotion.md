@@ -55,6 +55,7 @@ None.
 ## Post-closure update (2026-11-01)
 
 The local promotion described above is unchanged. After the phase 14 merge, `cd.yml` run
-41332436297 published `0.1.0` to Quay and deployed it by digest; see
-`blueprint/changes/p11-remote-publication.md`. The remote publication is a separate event,
-not part of this local promotion.
+41332436297 published `0.1.0` to Quay and deployed it by digest. A second run, 41334455398
+on `21772cc`, published the current digest and superseded the first; `cd.yml` now requires
+`workflow_dispatch`. See `blueprint/changes/p11-remote-publication.md`. The remote
+publications are separate events, not part of this local promotion.

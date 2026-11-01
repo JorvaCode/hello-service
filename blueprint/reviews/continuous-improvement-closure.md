@@ -76,8 +76,8 @@ not an independent review.
 ### 10. No unnecessary scope?
 
 - No improvement item is implemented; all remain deferred.
-- Remote publication was completed on 2026-11-01 by CD run 41332436297; see the
-  post-closure update below.
+- Remote publications were completed on 2026-11-01 by CD runs 41332436297 and 41334455398;
+  see the post-closure update below.
 - No requirement, architecture, ADR or code change is introduced.
 
 ## Findings
@@ -101,8 +101,12 @@ unavailable.
 
 Merging PR #5 triggered `cd.yml` on `c7d3a86`. CD run 41332436297 published
 `quay.io/odysseia/hello-service:0.1.0@sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`,
-deployed it by digest and passed the smoke test. This does not change the phase 14 verdict:
-the improvement items remain deferred. The remote publication is recorded in
+deployed it by digest and passed the smoke test. Merging PR #6 on `21772cc` triggered CD
+run 41334455398, which published
+`quay.io/odysseia/hello-service:0.1.0@sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17`
+and superseded the first digest. `cd.yml` now requires `workflow_dispatch`; automatic push
+publication is disabled. This does not change the phase 14 verdict: the improvement items
+remain deferred. The remote publications are recorded in
 `blueprint/changes/p11-remote-publication.md` and reviewed in
 `blueprint/reviews/remote-publication.md`.
 

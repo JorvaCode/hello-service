@@ -84,6 +84,7 @@ None.
 
 ## Post-closure update (2026-11-01)
 
-Remote publication to Quay was completed after this phase by `cd.yml` run 41332436297; see
-`blueprint/changes/p11-remote-publication.md`. The observability scope remains local and
-manual: no automated alerting, metrics or traces were added by the remote publication.
+Remote publications to Quay were completed after this phase by `cd.yml` runs 41332436297
+and 41334455398; see `blueprint/changes/p11-remote-publication.md`. The observability scope
+remains local and manual: no automated alerting, metrics or traces were added by the remote
+publications.

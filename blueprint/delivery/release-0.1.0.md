@@ -64,34 +64,38 @@ Checks:
   - `GET /api/status` -> `200`, `application/json`, `{"status":"UP"}`, with
     `X-Request-ID`.
 
-Result: promoted to the `local` environment. A separate remote publication of `0.1.0`
-was performed by `cd.yml` on 2026-11-01; see "Remote publication (post-closure)" below.
+Result: promoted to the `local` environment. Two separate remote publications of `0.1.0`
+were performed by `cd.yml` on 2026-11-01; see "Remote publications (post-closure)" below.
 No remote promotion to a second environment is claimed.
 
-## Remote publication (post-closure)
+## Remote publications (post-closure)
 
-The merge of PR #5 into `main` (`c7d3a86`) triggered `cd.yml` on 2026-11-01. The workflow
-published version `0.1.0` to Quay and deployed it by digest:
+Two merges to `main` triggered `cd.yml` on 2026-11-01. The first published `0.1.0` from
+`c7d3a86`; the second published from `21772cc` and superseded the first digest. Automatic
+push publication is now disabled; `cd.yml` requires `workflow_dispatch`.
+
+| Publication | Source commit | CI run | CD run | Remote digest |
+| --- | --- | --- | --- | --- |
+| First | `c7d3a86b04e7b39a8ccfa55c37c8ae2c3dc4c2c0` | 41332436321 (`success`) | 41332436297 (`success`) | `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b` (superseded) |
+| Second (current) | `21772ccb0012c36e2264ede3171758ddfd773525` | 41334455181 (`success`) | 41334455398 (`success`) | `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17` |
 
 | Field | Value |
 | --- | --- |
-| Source commit | `c7d3a86b04e7b39a8ccfa55c37c8ae2c3dc4c2c0` |
-| CI run | 41332436321 (`success`) |
-| CD run | 41332436297 (`success`) |
 | Registry namespace | `odysseia` |
 | Auth mode | `oidc` |
 | Remote image | `quay.io/odysseia/hello-service:0.1.0` |
-| Remote digest | `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b` |
-| Deploy | by digest, `quay.io/odysseia/hello-service@sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b` |
+| Current remote digest | `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17` |
+| First remote digest (superseded) | `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b` |
+| Deploy | by digest, `quay.io/odysseia/hello-service@sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17` |
 | Smoke test | `GET /api/hello` -> `200`, `text/plain;charset=UTF-8`, `Hello, World!` |
 | Promotion | mechanism prepared; no second environment executed |
 | Remote rollback | not exercised; no previous remote release recorded |
 
-The remote image is a separate build from the local artifact above. The local image ID and
-JAR SHA-256 identify the local promotion at `870500c`; the remote digest identifies the
-CD build at `c7d3a86`. The tag `0.1.0` is mutable; the digest is the immutable identity of
-the published remote artifact. The remote publication is recorded in
-`blueprint/changes/p11-remote-publication.md` and reviewed in
+The remote images are separate builds from the local artifact above. The local image ID and
+JAR SHA-256 identify the local promotion at `870500c`; the remote digests identify the
+CD builds at `c7d3a86` and `21772cc`. The tag `0.1.0` is mutable; the current digest is the
+immutable identity of the published remote artifact. The remote publications are recorded
+in `blueprint/changes/p11-remote-publication.md` and reviewed in
 `blueprint/reviews/remote-publication.md`.
 
 ## Rollback plan and rehearsal
@@ -127,10 +131,11 @@ Rehearsal result (2026-10-30):
   repository is a single-maintainer repository and no independent human reviewer is
   recorded. This record does not claim an independent approval; `standards/git.md`
   requires the single-maintainer fact to be recorded rather than simulated.
-- Gate: P-11 is `CLOSED` for the local promotion and the remote publication with the
+- Gate: P-11 is `CLOSED` for the local promotion and the remote publications with the
   self-approval above; it does not claim an independent approval.
-- Remote publication to Quay was completed on 2026-11-01 by CD run 41332436297; see
-  "Remote publication (post-closure)" above. No remote promotion to a second environment
+- Remote publications to Quay were completed on 2026-11-01 by CD runs 41332436297 and
+  41334455398; see "Remote publications (post-closure)" above. The current digest is
+  `0d8deff`; the first digest is superseded. No remote promotion to a second environment
   or remote rollback is claimed.
 - The `local` environment is not staging or production; the local promotion result is
   scoped to `local`. The remote deployment ran in the GitHub Actions runner and is not a

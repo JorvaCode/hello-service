@@ -14,24 +14,26 @@ improvement candidates below.
 
 | Item | Approved treatment | State after closure |
 |---|---|---|
-| Closure scope | PoC with CI, local deployment and remote publication | Approved and retained |
-| Remote publication to Quay | Record the remote publication when `cd.yml` executes | Completed 2026-11-01 — `quay.io/odysseia/hello-service:0.1.0@sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`; CD run 41332436297 |
-| Residual risk of `cd.yml` | Document the risk without modifying the workflow | Approved; workflow unchanged |
+| Closure scope | PoC with CI, local deployment and manual remote publication | Approved and retained |
+| Remote publication to Quay | Record the remote publication when `cd.yml` executes | Completed 2026-11-01 — current digest `quay.io/odysseia/hello-service:0.1.0@sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17`; CD runs 41332436297 and 41334455398 |
+| Residual risk of `cd.yml` | Document the risk and remove the automatic push trigger | Approved; `cd.yml` now requires `workflow_dispatch` |
 | Independent review of `REQ-STATUS-001` | Record the absence of an independent reviewer; do not claim independent approval | Not performed — a non-independent review record exists in `blueprint/reviews/api-status-endpoint.md`; the delivery closure has a self-review in `blueprint/reviews/delivery-closure.md` |
 | Local execution | Verify and document a reproducible startup procedure | Completed 2026-10-30 — procedure and evidence in `blueprint/deployment/local-0.1.0.md` and `README.md` |
-| Local promotion and rollback | Record a local promotion of `0.1.0` and rehearse the rollback | Completed 2026-10-30 — `blueprint/delivery/release-0.1.0.md`; remote publication completed 2026-11-01 by CD run 41332436297 |
+| Local promotion and rollback | Record a local promotion of `0.1.0` and rehearse the rollback | Completed 2026-10-30 — `blueprint/delivery/release-0.1.0.md`; remote publications completed 2026-11-01 by CD runs 41332436297 and 41334455398 |
 | `CHANGELOG.md` | Do not create | Approved |
 | Blueprint formal validation | Do not claim validation | Remains `NOT VERIFIED` |
 | Gates P-02, P-06, P-07, P-10, P-11, P-13 and P-14 | Do not close a gate without its evidence; record independence limitations | P-06, P-07, P-10, P-11, P-13 and P-14 closed; P-07, P-11, P-13 and P-14 closed with solo-maintainer self-review and no independent approval; P-02 not verified |
-| Real CI execution | Record the successful GitHub Actions runs | Completed — run 10 on `6ccd170`, run 13 on `2e54476`, run 41220748392 on `0fbaffc`, run 41225786925 on `195d40c`, and runs 41332436321/41332436297 on `c7d3a86` concluded `success` |
+| Real CI execution | Record the successful GitHub Actions runs | Completed — run 10 on `6ccd170`, run 13 on `2e54476`, run 41220748392 on `0fbaffc`, run 41225786925 on `195d40c`, runs 41332436321/41332436297 on `c7d3a86`, and runs 41334455181/41334455398 on `21772cc` concluded `success` |
 | IMP-001 … IMP-005 | Keep as `Deferred` | No implementation; each item now names an owner, an artifact and its feedback source |
 
-The remote publication of `0.1.0` was completed on 2026-11-01 by `cd.yml` run 41332436297
-on `c7d3a86`; the image and digest are recorded in
-`blueprint/changes/p11-remote-publication.md`. The local promotion remains recorded
-separately in `blueprint/delivery/release-0.1.0.md`. The remote publication does not close
-any deferred improvement item and does not change a requirement. The gate identifiers
-P-02, P-06, P-07, P-10, P-11, P-13 and P-14 are defined in `blueprint/gates.md`.
+The remote publications of `0.1.0` were completed on 2026-11-01 by `cd.yml` runs
+41332436297 on `c7d3a86` and 41334455398 on `21772cc`; the current image and digest are
+recorded in `blueprint/changes/p11-remote-publication.md`. The local promotion remains
+recorded separately in `blueprint/delivery/release-0.1.0.md`. `cd.yml` now requires
+`workflow_dispatch`; automatic push publication is disabled. The remote publications do
+not close any deferred improvement item and do not change a requirement. The gate
+identifiers P-02, P-06, P-07, P-10, P-11, P-13 and P-14 are defined in
+`blueprint/gates.md`.
 
 ## Feedback Sources
 
@@ -69,6 +71,8 @@ P-02, P-06, P-07, P-10, P-11, P-13 and P-14 are defined in `blueprint/gates.md`.
 10. A delivery workflow's trigger is part of its behaviour: a documentation-only merge to
     `main` can execute `cd.yml` and publish an artifact. The closure record must distinguish
     a postponed intention from the workflow's actual trigger.
+11. A manual workflow disable did not prevent a push-triggered run in this repository;
+    removing the trigger from the workflow definition is the reliable control.
 
 ## Improvement Candidates
 
@@ -202,10 +206,12 @@ in `blueprint/changes/p11-remote-publication.md`; it is not a phase 14 improveme
 The closure record closes the phase 14 register change. It does not claim that any deferred
 improvement was delivered. The loops for `IMP-001` … `IMP-005` remain open by design.
 
-Post-closure event (2026-11-01): merging PR #5 triggered `cd.yml` on `c7d3a86`; run
-41332436297 published `0.1.0` to Quay and deployed it by digest. This event is recorded in
-`blueprint/changes/p11-remote-publication.md`. It does not change the deferred status of
-`IMP-001` … `IMP-005` or the phase 14 gate verdict.
+Post-closure events (2026-11-01): merging PR #5 triggered `cd.yml` on `c7d3a86`; run
+41332436297 published `0.1.0` to Quay and deployed it by digest. Merging PR #6 on
+`21772cc` triggered run 41334455398, which published a second digest and superseded the
+first. `cd.yml` now requires `workflow_dispatch`; automatic push publication is disabled.
+These events are recorded in `blueprint/changes/p11-remote-publication.md`. They do not
+change the deferred status of `IMP-001` … `IMP-005` or the phase 14 gate verdict.
 
 ## Phase 14 Gate
 

@@ -47,17 +47,24 @@ deployment gate is closed with the solo-maintainer self-review recorded in
 `blueprint/reviews/delivery-closure.md`; it does not claim an independent approval. This
 record covers the `local` environment.
 
-## Remote deployment record — 0.1.0
+## Remote deployment records — 0.1.0
 
-On 2026-11-01, `cd.yml` run 41332436297 on `c7d3a86` published
-`quay.io/odysseia/hello-service:0.1.0@sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`
-and deployed it by digest to a Podman container on the GitHub Actions runner. The
-post-deployment smoke test `GET /api/hello` returned `200`, `text/plain;charset=UTF-8`,
-`Hello, World!`.
+On 2026-11-01, two `cd.yml` runs published `0.1.0` and deployed it by digest to a Podman
+container on the GitHub Actions runner:
+
+| Deployment | Source commit | CI run | CD run | Digest |
+| --- | --- | --- | --- | --- |
+| First | `c7d3a86b04e7b39a8ccfa55c37c8ae2c3dc4c2c0` | 41332436321 (`success`) | 41332436297 (`success`) | `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b` (superseded) |
+| Second (current) | `21772ccb0012c36e2264ede3171758ddfd773525` | 41334455181 (`success`) | 41334455398 (`success`) | `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17` |
+
+Both post-deployment smoke tests `GET /api/hello` returned `200`,
+`text/plain;charset=UTF-8`, `Hello, World!`. The tag `0.1.0` is mutable and currently
+points to the second digest. Automatic push publication is now disabled; publication
+requires `workflow_dispatch`.
 
 The promotion mechanism was prepared for the same digest, but no second environment was
 configured, so end-to-end promotion was not executed. A remote rollback was not exercised;
 no previous remote release is recorded. The local deployment and rollback record remains
-`blueprint/deployment/local-0.1.0.md`. The remote event is recorded in
+`blueprint/deployment/local-0.1.0.md`. The remote deployments are recorded in
 `blueprint/changes/p11-remote-publication.md` and reviewed in
 `blueprint/reviews/remote-publication.md`.

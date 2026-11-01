@@ -109,8 +109,9 @@ Independent approval remains unavailable.
 
 ## Post-closure update (2026-11-01)
 
-The local promotion reviewed here is unchanged. After the phase 14 merge, `cd.yml` run
-41332436297 published `0.1.0` to Quay and deployed it by digest; see
+The local promotion reviewed here is unchanged. After the phase 14 merge, `cd.yml` runs
+41332436297 and 41334455398 published `0.1.0` to Quay and deployed it by digest; the second
+run superseded the first, and `cd.yml` now requires `workflow_dispatch`. See
 `blueprint/changes/p11-remote-publication.md` and
 `blueprint/reviews/remote-publication.md`. This addendum does not convert the self-review
 into an independent review.
