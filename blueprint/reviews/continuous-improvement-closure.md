@@ -76,7 +76,8 @@ not an independent review.
 ### 10. No unnecessary scope?
 
 - No improvement item is implemented; all remain deferred.
-- Remote publication remains postponed and is not claimed.
+- Remote publication was completed on 2026-11-01 by CD run 41332436297; see the
+  post-closure update below.
 - No requirement, architecture, ADR or code change is introduced.
 
 ## Findings
@@ -85,8 +86,8 @@ not an independent review.
 | --- | --- | --- | --- |
 | F-1 | Info | No independent reviewer exists; this is a self-review by the agent that produced the records. | Recorded as a process limitation. Independent approval remains unavailable. |
 | F-2 | Info | All five improvement items remain deferred; their loops are open. | Accepted by design. The phase 14 closure records the register change, not the delivery of the deferred items. |
-| F-3 | Info | No requirement revision or release is claimed. | Correct: no item revises a requirement; `0.1.0` remains the delivered local release. |
-| F-4 | Info | The phase 14 change is documentation-only; its evidence is the local test run and the phase 13 CI run. | Accepted; the phase 14 pull request will run CI, and the tested artifact is unchanged. |
+| F-3 | Info | No requirement revision or release is claimed. | Correct: no item revises a requirement; `0.1.0` remains the delivered release, and the remote publication is recorded separately. |
+| F-4 | Info | The phase 14 change is documentation-only; its evidence is the local test run and the phase 13 CI run. | Accepted; phase 14 CI run 41225786925 later concluded `success`, and the tested artifact is unchanged. |
 | F-5 | Info | `CHANGELOG.md` is intentionally not created. | Approved by the closure scope; the release record is `blueprint/delivery/release-0.1.0.md`. |
 
 ## Verdict
@@ -95,6 +96,15 @@ Approved for the phase 14 register and closure scope on the recorded evidence. E
 improvement item is traceable to feedback, an owner and a named artifact; every finding has
 a disposition. The loops for the deferred items remain open. Independent approval remains
 unavailable.
+
+## Post-closure update (2026-11-01)
+
+Merging PR #5 triggered `cd.yml` on `c7d3a86`. CD run 41332436297 published
+`quay.io/odysseia/hello-service:0.1.0@sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`,
+deployed it by digest and passed the smoke test. This does not change the phase 14 verdict:
+the improvement items remain deferred. The remote publication is recorded in
+`blueprint/changes/p11-remote-publication.md` and reviewed in
+`blueprint/reviews/remote-publication.md`.
 
 ## Reviewer, independence and date
 

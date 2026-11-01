@@ -35,7 +35,8 @@ Every improvement item has an owner and names the artifact it changes, and every
 
 The improvement register is `blueprint/improvements/continuous-improvements.md`. It records
 five owned improvement items, each with the artifact it would change and the feedback that
-raised it. All five remain `Deferred`; no requirement revision or release is claimed.
+raised it. All five remain `Deferred`; no requirement revision or new release version is
+claimed.
 
 The phase 14 gate is **CLOSED for the register/closure change with a limitation**: the
 register and closure record are complete, but the loops for `IMP-001` … `IMP-005` remain
@@ -43,3 +44,9 @@ open. The review is a solo-maintainer self-review in
 `blueprint/reviews/continuous-improvement-closure.md`; it does not claim an independent
 approval. The change is recorded in `blueprint/changes/p14-continuous-improvement.md` and the
 gate in `blueprint/gates.md` (P-14).
+
+Post-closure update (2026-11-01): merging PR #5 triggered `cd.yml` on `c7d3a86`; run
+41332436297 published `0.1.0` to Quay and deployed it by digest. This is a delivery event
+recorded in `blueprint/changes/p11-remote-publication.md`, not a phase 14 improvement
+implementation. The five improvement items remain `Deferred` and the phase 14 gate remains
+closed for the register.

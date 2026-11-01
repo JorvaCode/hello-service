@@ -49,3 +49,9 @@ Delete the file. No artifact or environment is affected.
 ## Deletions
 
 None.
+
+## Post-closure update (2026-11-01)
+
+The README now records the remote publication of `0.1.0` by `cd.yml` run 41332436297; see
+`blueprint/changes/p11-remote-publication.md`. The "postponed remote publication" wording
+in the original README change is superseded by that result.

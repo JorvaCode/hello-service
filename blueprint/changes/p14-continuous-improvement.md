@@ -52,6 +52,7 @@ No code, configuration, dependency or deployment file changes.
 | --- | --- | --- |
 | Existing contracts remain green | Unit/integration | Local run on 2026-10-30T18:45:20Z: `.\gradlew.bat clean test --offline --no-daemon --console=plain` -> `BUILD SUCCESSFUL`; 17 tests, 0 failures, 0 errors, 0 skipped |
 | The last code-bearing change is green | CI | Phase 13 CI run 41220748392 on `0fbaffc` concluded `success` |
+| The phase 14 change is green in CI | CI | Phase 14 CI run 41225786925 on `195d40c` concluded `success` |
 | Every improvement item is traceable | Inspection | Each `IMP-001` … `IMP-005` names a source, owner, artifact and status; the closure record maps each item to its evidence |
 | The phase 14 change is documentation-only | Inspection | The diff touches only `blueprint/`, `README.md` and the gate register; no `src/`, build or deployment file changes |
 
@@ -67,8 +68,10 @@ review or change record. `IMP-002` records the deferred dependency-vulnerability
 
 ## Deployment
 
-None. The local `0.1.0` deployment and the runbook remain unchanged. Remote publication to
-Quay remains postponed and is not claimed.
+This change itself makes no deployment change; the local `0.1.0` deployment and the
+runbook remain unchanged. After this change merged, `cd.yml` published `0.1.0` to Quay and
+deployed it by digest; see the post-merge update below and
+`blueprint/changes/p11-remote-publication.md`.
 
 ## Rollback
 
@@ -79,3 +82,12 @@ local rollback to `0.0.1-SNAPSHOT` remains documented in
 ## Deletions
 
 None.
+
+## Post-merge update (2026-11-01)
+
+Merging this change to `main` (`c7d3a86`) triggered `cd.yml` run 41332436297. The workflow
+published
+`quay.io/odysseia/hello-service:0.1.0@sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`,
+deployed it by digest and passed the smoke test. The phase 14 register and the deferred
+improvement items are unchanged. The remote publication is recorded in
+`blueprint/changes/p11-remote-publication.md`.

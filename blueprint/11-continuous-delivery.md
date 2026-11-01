@@ -53,24 +53,29 @@ step:
   2026-10-30. The release identity, checks, promotion result and rollback rehearsal are
   recorded in `blueprint/delivery/release-0.1.0.md`; the deployment record is
   `blueprint/deployment/local-0.1.0.md`.
-- CD and remote publication: no `cd.yml` execution, remote publication or remote digest
-  has been verified in this closure.
+- Remote publication: merging PR #5 pushed `c7d3a86` to `main` on 2026-11-01 and triggered
+  `cd.yml`. Run 41332436297 succeeded, published
+  `quay.io/odysseia/hello-service:0.1.0@sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`,
+  deployed it by digest and passed the smoke test. The earlier statement that no `cd.yml`
+  execution had occurred is superseded by `blueprint/changes/p11-remote-publication.md`.
 
 ### Current PoC boundary
 
-- Remote publication to Quay is postponed for the `hello-service` PoC.
+- Remote publication to Quay was completed for `0.1.0` on 2026-11-01; see
+  `blueprint/changes/p11-remote-publication.md`. Promotion to a second environment is not
+  executed.
 - `ci.yml` no longer contains a publication path: it builds, tests and records the image
   identity only. No publication by that workflow is claimed.
-- `cd.yml` contains a potential remote publication path through `push` and
-  `workflow_dispatch`, including OIDC, registry login and image push. It is not modified
-  by this closure and no execution or publication is claimed.
-- The local promotion of `0.1.0` is recorded and its rollback path was rehearsed. Remote
-  publication to Quay remains postponed and is not claimed.
+- `cd.yml` contains the remote publication path through `push` and `workflow_dispatch`,
+  including OIDC, registry login and image push. It executed on `c7d3a86`; the workflow
+  itself is not modified by this record.
+- The local promotion of `0.1.0` is recorded and its rollback path was rehearsed. The
+  remote publication is recorded separately and the tag `0.1.0` remains mutable.
 - The gate identifiers P-02, P-06, P-07, P-10 and P-11 are defined in `blueprint/gates.md`.
-- P-11 is closed with the local promotion evidence and a solo-maintainer self-approval;
-  the record does not claim an independent approval. P-02 remains open; P-07 is closed
-  with the same solo-maintainer limitation. The Quality gate above remains applicable to
-  any promotion, local or remote.
+- P-11 is closed with the local promotion and remote publication evidence and a
+  solo-maintainer self-approval; the record does not claim an independent approval. P-02
+  remains open; P-07 is closed with the same solo-maintainer limitation. The Quality gate
+  above remains applicable to any promotion, local or remote.
 
 ## Local promotion record
 
@@ -85,6 +90,25 @@ step:
 - Approval: self-review in `blueprint/reviews/delivery-closure.md`; no independent
   reviewer exists. P-11 is closed with this self-approval and does not claim an
   independent approval.
+
+## Remote publication record
+
+- Release: `0.1.0` built from `c7d3a86` (merge commit of PR #5).
+- Environment: GitHub Actions runner, deploying by digest to a Podman container on the
+  runner; no staging or production target.
+- Registry: `quay.io/odysseia/hello-service:0.1.0`.
+- Digest:
+  `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`.
+- Auth mode: `oidc`.
+- Promotion result: image published, deployed by digest and smoke-tested
+  (`GET /api/hello` -> `200`, `text/plain;charset=UTF-8`, `Hello, World!`).
+- Promotion mechanism: prepared for the same digest; no second environment was configured,
+  so end-to-end promotion was not executed.
+- Rollback: not exercised for the remote environment; no previous remote release is
+  recorded. The local rollback remains exercised.
+- Records: `blueprint/changes/p11-remote-publication.md`,
+  `blueprint/reviews/remote-publication.md`.
+- Approval: solo-maintainer self-review; no independent approval is claimed.
 
 ## Environments
 Common examples:

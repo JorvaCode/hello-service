@@ -56,3 +56,10 @@ Revert the commit; the previous document text is restored.
 ## Deletions
 
 None.
+
+## Post-closure update (2026-11-01)
+
+`cd.yml` executed on `c7d3a86` and published `0.1.0` to Quay; see
+`blueprint/changes/p11-remote-publication.md`. The boundary that keeps publication in
+`cd.yml` is unchanged; the postponed state recorded here is superseded by the recorded
+execution.

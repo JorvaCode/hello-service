@@ -1,17 +1,17 @@
 # hello-service
 
 PoC mínimo de servicio HTTP usado para recorrer las fases del Software Engineering
-Blueprint. No es un servicio de producción ni una publicación remota; la versión `0.1.0`
-tiene un registro de release local.
+Blueprint. No es un servicio de producción; la versión `0.1.0` tiene un registro de
+release local y una publicación remota en Quay registrada el 2026-11-01.
 
 ## Alcance de cierre
 
-El cierre aprobado cubre la PoC de `hello-service` con configuración de CI y despliegue
-local.
+El cierre aprobado cubre la PoC de `hello-service` con configuración de CI, despliegue
+local y publicación remota mediante `cd.yml`.
 
-- La publicación remota en Quay queda pospuesta.
-- El riesgo residual de `.github/workflows/cd.yml` se documenta y no se modifica el
-  workflow.
+- La publicación remota en Quay se realizó el 2026-11-01 con `cd.yml` (run 41332436297);
+  el digest remoto es `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`.
+- El workflow `cd.yml` se ejecutó al fusionar el PR #5; no se modifica en este cambio.
 - La revisión independiente de `REQ-STATUS-001` no se realizó; el cierre de P-07 registra
   una autoevaluación del mantenedor y no una aprobación independiente.
 - No se crea `CHANGELOG.md`.
@@ -39,8 +39,9 @@ Entorno registrado para la evidencia actual:
 - Gradle Wrapper 8.14.2 incluido en el repositorio.
 - Caché local de dependencias si se ejecuta Gradle con `--offline`.
 
-Las pruebas documentadas no requieren servicios externos, base de datos, secretos ni
-configuración de Quay.
+Las pruebas locales documentadas no requieren servicios externos, base de datos, secretos
+ni configuración de Quay; la publicación remota usa la configuración de Quay del
+repositorio.
 
 ## Ejecución local
 
@@ -98,7 +99,7 @@ dependencias.
 `REQ-STATUS-001` la realizó el asistente OpenCode, no un revisor humano independiente;
 esa aprobación sigue pendiente y no debe presentarse como obtenida.
 
-## Estado de CI y despliegue local
+## Estado de CI, despliegue local y publicación remota
 
 | Área | Evidencia de configuración | Evidencia de ejecución real | Estado |
 |---|---|---|---|
@@ -106,22 +107,29 @@ esa aprobación sigue pendiente y no debe presentarse como obtenida.
 | Packaging | Versión `0.1.0`, JAR ejecutable, imagen OCI con labels de procedencia, identidad y escaneo gitleaks | Run 13: artefactos `artifact-metadata`, `hello-service-0.1.0` y `gitleaks-report`; conclusión `success` | P-10 `CLOSED` |
 | Pruebas locales | Gradle Wrapper y suite automatizada | Ejecución registrada de 17 tests sobre `f2b03e5`, `72c2ad5` y `870500c` | Ejecución local documentada y repetida sobre el `HEAD` del cierre |
 | Despliegue local | `Dockerfile` OCI, usuario no-root, puerto `8080` y entrypoint del JAR | Procedimiento reproducible verificado el 2026-10-30: build local, imagen `0.1.0`, contenedor como `appuser`, probes en `127.0.0.1:18080` y rollback a `0.0.1-SNAPSHOT` | Procedimiento verificado; registro en `blueprint/deployment/local-0.1.0.md` |
-| Release local / P-11 | Versión `0.1.0`, imagen local y rollback a `0.0.1-SNAPSHOT` | Promoción local registrada el 2026-10-30; rollback ejercitado | P-11 `CLOSED` con autoevaluación; sin aprobación independiente |
+| Release local / P-11 | Versión `0.1.0`, imagen local y rollback a `0.0.1-SNAPSHOT` | Promoción local registrada el 2026-10-30; rollback ejercitado | P-11 `CLOSED` con autoevaluación; publicación remota registrada; sin aprobación independiente |
 | Observabilidad / P-13 | Logs estructurados con `requestId`, `/api/status` liveness y runbook manual; sin métricas, trazas ni alertas automatizadas | Registro en `blueprint/observability/hello-service.md`; prueba de correlación y runbook el 2026-10-30; 17 tests verdes en la revisión | P-13 `CLOSED` con detección manual; sin aprobación independiente |
 | Mejora continua / P-14 | Registro de mejoras con propietario, artefacto y fuente de feedback; `IMP-001` … `IMP-005` diferidos | Registro y cierre en `blueprint/improvements/continuous-improvements.md`; revisión en `blueprint/reviews/continuous-improvement-closure.md` | P-14 `CLOSED` para el registro; bucles de mejora abiertos; sin aprobación independiente |
-| CD / Quay | `.github/workflows/cd.yml` contiene disparadores, pasos de OIDC, login y push a Quay | No hay evidencia de ejecución ni de publicación o digest remoto | Publicación remota pospuesta; ruta potencial conservada y riesgo documentado |
+| CD / Quay | `.github/workflows/cd.yml` contiene disparadores, pasos de OIDC, login y push a Quay | Run 41332436297 sobre `c7d3a86`: `success`; imagen `quay.io/odysseia/hello-service:0.1.0`, digest `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`, deploy por digest y smoke test `GET /api/hello` -> `200` | Publicación remota completada; promoción a segundo entorno no ejecutada; sin rollback remoto |
 
-## Publicación remota pospuesta
+## Publicación remota
 
-La publicación remota en Quay está pospuesta por decisión de alcance. La promoción local
-de `0.1.0` sí está registrada en `blueprint/delivery/release-0.1.0.md` y no se presenta
-como publicación remota.
+La publicación remota de `0.1.0` se realizó el 2026-11-01 al fusionar el PR #5, que
+disparó `cd.yml` sobre `c7d3a86`. El workflow usó autenticación OIDC y publicó en el
+namespace `odysseia`:
 
-- `ci.yml` no contiene ruta de publicación: construye, prueba y registra la identidad de la
-  imagen. No se declara ninguna imagen publicada por ese workflow.
-- `cd.yml` contiene una ruta potencial de publicación mediante `push` a `main` y
-  `workflow_dispatch`; no se modifica en este cierre.
-- No se declara una publicación realizada ni un digest remoto.
+- Imagen: `quay.io/odysseia/hello-service:0.1.0`.
+- Digest: `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`.
+- Deploy por digest y smoke test `GET /api/hello` -> `200`, `text/plain;charset=UTF-8`,
+  `Hello, World!`.
+- CI run 41332436321 y CD run 41332436297, ambos `success`.
+- Promoción a un segundo entorno: mecanismo preparado, no ejecutado.
+- Rollback remoto: no ejercitado; no hay release remoto anterior registrado.
+- El registro local de `0.1.0` sigue en `blueprint/delivery/release-0.1.0.md`; el evento
+  remoto se registra en `blueprint/changes/p11-remote-publication.md`.
+
+El tag `0.1.0` es mutable: un push posterior a `main` puede republicarlo con un digest
+nuevo. El digest publicado es la identidad inmutable del artefacto remoto actual.
 
 ## Observabilidad
 
@@ -147,8 +155,8 @@ El registro de mejora continua está en
 feedback que lo originó.
 
 - Los cinco items siguen `Deferred`; no se implementó ninguno en esta fase.
-- No hay revisión de requisito ni release nuevo; `0.1.0` sigue siendo el release local
-  entregado.
+- No hay revisión de requisito ni versión nueva; `0.1.0` sigue siendo la versión
+  entregada, ahora también publicada en Quay.
 - El cierre de la fase 14 está en el registro y en
   `blueprint/reviews/continuous-improvement-closure.md`; es una autoevaluación del
   mantenedor, no una aprobación independiente.
@@ -164,10 +172,12 @@ feedback que lo originó.
 - P-02 permanece abierto; P-06, P-07, P-10, P-11, P-13 y P-14 están cerrados; P-07, P-11,
   P-13 y P-14 registran autoevaluación del mantenedor y no una aprobación independiente
   (definidos en `blueprint/gates.md`).
-- `cd.yml` mantiene una ruta potencial de publicación; el riesgo residual se documenta
-  sin modificar el workflow.
-- La publicación remota no tiene evidencia de ejecución. La promoción local de `0.1.0`
-  sí está registrada y su rollback fue ejercitado.
+- `cd.yml` se ejecutó al fusionar el PR #5 y publicó `0.1.0`; el workflow no se modifica en
+  este cambio.
+- La publicación remota tiene evidencia de ejecución y digest registrado. La promoción
+  local de `0.1.0` sigue registrada y su rollback fue ejercitado.
+- No se ejecutó promoción remota a un segundo entorno ni rollback remoto; el tag `0.1.0`
+  es mutable.
 - No hay readiness probe ni despliegue en staging o producción; `/api/status` es una señal
   de liveness.
 - No hay alertas automatizadas, métricas, trazas ni access log por petición; la detección de
@@ -185,6 +195,8 @@ feedback que lo originó.
 - [Packaging](blueprint/packaging/hello-service.md)
 - [Release 0.1.0](blueprint/delivery/release-0.1.0.md)
 - [Despliegue local 0.1.0](blueprint/deployment/local-0.1.0.md)
+- [Cambio de publicación remota](blueprint/changes/p11-remote-publication.md)
+- [Revisión de publicación remota](blueprint/reviews/remote-publication.md)
 - [Observabilidad local](blueprint/observability/hello-service.md)
 - [Revisión de observabilidad](blueprint/reviews/observability-closure.md)
 - [Cambio de observabilidad](blueprint/changes/p13-observability.md)

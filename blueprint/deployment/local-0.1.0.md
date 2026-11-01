@@ -58,5 +58,6 @@ Identity of the target and the full rehearsal record:
 
 The post-deployment verification passed and the rollback path was exercised. The
 deployment gate is closed with the solo-maintainer self-review recorded in
-`blueprint/reviews/delivery-closure.md`; it does not claim an independent approval. The
-deployment is scoped to the `local` environment; no remote publication is claimed.
+`blueprint/reviews/delivery-closure.md`; it does not claim an independent approval. This
+record covers the `local` environment only. The remote publication and deployment by
+digest are recorded in `blueprint/changes/p11-remote-publication.md`.
