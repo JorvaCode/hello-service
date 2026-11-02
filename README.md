@@ -18,9 +18,9 @@ local y publicaciones remotas mediante `cd.yml`.
   una autoevaluación del mantenedor y no una aprobación independiente.
 - No se crea `CHANGELOG.md`.
 - El Blueprint no se declara formalmente validado.
-- Los gates se cierran solo con su evidencia: P-06, P-07, P-10, P-11, P-13 y P-14
-  están cerrados; P-07, P-11, P-13 y P-14 registran autoevaluación del mantenedor porque
-  no hay revisor independiente; P-02 sigue abierto (ver `blueprint/gates.md`).
+- Los gates se cierran solo con su evidencia: P-02, P-06, P-07, P-10, P-11, P-13 y P-14
+  están cerrados; P-02, P-07, P-11, P-13 y P-14 registran autoevaluación del mantenedor
+  porque no hay revisor independiente (ver `blueprint/gates.md`).
 
 ## Qué es y relación con el Blueprint
 
@@ -174,11 +174,11 @@ feedback que lo originó.
 - El Blueprint permanece `NO VERIFICADO` en cuanto a validación formal.
 - No se crea `CHANGELOG.md`; el registro de release es
   `blueprint/delivery/release-0.1.0.md`.
-- P-02 permanece abierto; P-06, P-07, P-10, P-11, P-13 y P-14 están cerrados; P-07, P-11,
-  P-13 y P-14 registran autoevaluación del mantenedor y no una aprobación independiente
+- P-02, P-06, P-07, P-10, P-11, P-13 y P-14 están cerrados; P-02, P-07, P-11, P-13 y
+  P-14 registran autoevaluación del mantenedor y no una aprobación independiente
   (definidos en `blueprint/gates.md`).
-- `cd.yml` se ejecutó al fusionar el PR #5 y publicó `0.1.0`; el workflow no se modifica en
-  este cambio.
+- `cd.yml` se ejecutó al fusionar los PR #5 y #6 y publicó `0.1.0` dos veces; el trigger
+  automático se eliminó y ahora solo admite `workflow_dispatch`.
 - La publicación remota tiene evidencia de ejecución y digest registrado. La promoción
   local de `0.1.0` sigue registrada y su rollback fue ejercitado.
 - No se ejecutó promoción remota a un segundo entorno ni rollback remoto; el tag `0.1.0`

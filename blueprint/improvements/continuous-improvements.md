@@ -22,7 +22,7 @@ improvement candidates below.
 | Local promotion and rollback | Record a local promotion of `0.1.0` and rehearse the rollback | Completed 2026-10-30 — `blueprint/delivery/release-0.1.0.md`; remote publications completed 2026-11-01 by CD runs 41332436297 and 41334455398 |
 | `CHANGELOG.md` | Do not create | Approved |
 | Blueprint formal validation | Do not claim validation | Remains `NOT VERIFIED` |
-| Gates P-02, P-06, P-07, P-10, P-11, P-13 and P-14 | Do not close a gate without its evidence; record independence limitations | P-06, P-07, P-10, P-11, P-13 and P-14 closed; P-07, P-11, P-13 and P-14 closed with solo-maintainer self-review and no independent approval; P-02 not verified |
+| Gates P-02, P-06, P-07, P-10, P-11, P-13 and P-14 | Do not close a gate without its evidence; record independence limitations | P-02, P-06, P-07, P-10, P-11, P-13 and P-14 closed; P-02, P-07, P-11, P-13 and P-14 closed with solo-maintainer self-review and no independent approval |
 | Real CI execution | Record the successful GitHub Actions runs | Completed — run 10 on `6ccd170`, run 13 on `2e54476`, run 41220748392 on `0fbaffc`, run 41225786925 on `195d40c`, runs 41332436321/41332436297 on `c7d3a86`, and runs 41334455181/41334455398 on `21772cc` concluded `success` |
 | IMP-001 … IMP-005 | Keep as `Deferred` | No implementation; each item now names an owner, an artifact and its feedback source |
 

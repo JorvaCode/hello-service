@@ -80,8 +80,9 @@ step:
 - The gate identifiers P-02, P-06, P-07, P-10 and P-11 are defined in `blueprint/gates.md`.
 - P-11 is closed with the local promotion and remote publication evidence and a
   solo-maintainer self-approval; the record does not claim an independent approval. P-02
-  remains open; P-07 is closed with the same solo-maintainer limitation. The Quality gate
-  above remains applicable to any promotion, local or remote.
+  is closed with a solo-maintainer analysis self-review for the documentation and CI
+  closure change set; P-07 is closed with the same limitation. The Quality gate above
+  remains applicable to any promotion, local or remote.
 
 ## Local promotion record
 
