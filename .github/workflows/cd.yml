@@ -13,6 +13,11 @@ name: CD
 # documented in blueprint/changes/p11-remote-publication.md. Publication now requires an
 # explicit workflow_dispatch on the commit to publish.
 #
+# Release controls:
+#   - The job runs in the protected `production` environment, restricted to `main`.
+#   - A release tag that already exists in Quay is refused unless the dispatcher sets
+#     allow_republish=true. The Git tag namespace is protected by a repository ruleset.
+#
 # ADR-010 authentication:
 #   1) Preferred  : OIDC/keyless via Quay robot-account federation (GitHub OIDC issuer).
 #   2) Alternative: Quay robot account/token stored exclusively as GitHub Actions Secrets.
@@ -20,7 +25,13 @@ name: CD
 # (see "External prerequisites" in blueprint/11-continuous-delivery.md).
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      allow_republish:
+        description: "Overwrite an existing release tag (intentional correction only)"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -34,6 +45,8 @@ jobs:
   cd:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    environment:
+      name: production
     outputs:
       version: ${{ steps.build.outputs.version }}
       image: ${{ steps.build.outputs.image }}
@@ -129,6 +142,35 @@ jobs:
             echo "${QUAY_TOKEN}" | podman login quay.io -u "${QUAY_USERNAME}" --password-stdin
           fi
           podman login --get-login quay.io
+
+      - name: Enforce immutable release tag
+        id: immutability
+        env:
+          QUAY_NAMESPACE: ${{ vars.QUAY_NAMESPACE }}
+          ALLOW_REPUBLISH: ${{ inputs.allow_republish }}
+        run: |
+          set -eu -o pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          if [[ "${ALLOW_REPUBLISH:-false}" == "true" ]]; then
+            echo "::warning::allow_republish=true; the release tag ${VERSION} may be overwritten by operator decision."
+            exit 0
+          fi
+          API="https://quay.io/api/v1/repository/${QUAY_NAMESPACE}/hello-service/tag/?specificTag=${VERSION}"
+          STATUS=$(curl -sS -o /tmp/quay-tags.json -w "%{http_code}" "${API}")
+          if [[ "${STATUS}" == "404" ]]; then
+            echo "Release tag ${VERSION} does not exist yet; publication may proceed."
+            exit 0
+          fi
+          if [[ "${STATUS}" != "200" ]]; then
+            echo "::error::Could not verify release tag ${VERSION} (HTTP ${STATUS}). Refusing to publish."
+            exit 1
+          fi
+          COUNT=$(jq -r '.tags | length' /tmp/quay-tags.json)
+          if [[ "${COUNT}" != "0" ]]; then
+            echo "::error::Release tag ${VERSION} already exists in Quay. Refusing to overwrite an immutable release tag; bump the version or dispatch with allow_republish=true for an intentional correction."
+            exit 1
+          fi
+          echo "Release tag ${VERSION} is not present; publication may proceed."
 
       - name: Build OCI image (Phase 10 artifact + provenance labels)
         id: build
@@ -234,6 +276,7 @@ jobs:
           | Image | \`quay.io/${QUAY_NAMESPACE}/hello-service:${{ steps.version.outputs.version }}\` |
           | Digest (immutable identity) | \`${{ steps.publish.outputs.digest }}\` |
           | Deploy | by digest via Podman (ADR-009) |
+          | Release control | immutable tag guard; environment `production` restricted to `main` |
           | Smoke | \`GET /api/hello\` → 200 \`Hello, World!\` |
           | Promotion | mechanism prepared; same digest, no \`podman build\` (ADR-010); execution requires an external target environment |
           Run the promoted artifact with: \`podman run ... quay.io/${QUAY_NAMESPACE}/hello-service@${{ steps.publish.outputs.digest }}\`
