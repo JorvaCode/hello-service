@@ -74,9 +74,12 @@ step:
   identity only. No publication by that workflow is claimed.
 - `cd.yml` contains the remote publication path through `workflow_dispatch`, including
   OIDC, registry login and image push. The automatic `push` trigger is removed after two
-  post-closure publications; publication requires an explicit dispatch.
+  post-closure publications; publication requires an explicit dispatch. The job runs in
+  the `production` environment, restricted to `main`.
 - The local promotion of `0.1.0` is recorded and its rollback path was rehearsed. The
-  remote publications are recorded separately and the tag `0.1.0` remains mutable.
+  remote publications are recorded separately. Git tags are protected by the
+  `immutable-release-tags` ruleset and an existing Quay tag is refused unless
+  `allow_republish=true`; the digest remains the immutable identity.
 - The gate identifiers P-02, P-06, P-07, P-10 and P-11 are defined in `blueprint/gates.md`.
 - P-11 is closed with the local promotion and remote publication evidence and a
   solo-maintainer self-approval; the record does not claim an independent approval. P-02
@@ -117,8 +120,24 @@ Two publications of `0.1.0` were executed on 2026-11-01:
 | Records | `blueprint/changes/p11-remote-publication.md`, `blueprint/reviews/remote-publication.md` | Same |
 | Approval | Solo-maintainer self-review; no independent approval | Solo-maintainer self-review; no independent approval |
 
-The tag `0.1.0` is mutable and currently points to the second digest. Automatic push
-publication is disabled; publication requires `workflow_dispatch`.
+The digest is the immutable identity. The Git tag namespace is protected by a ruleset and
+`cd.yml` refuses to overwrite an existing Quay tag unless the dispatcher sets
+`allow_republish=true`. Automatic push publication is disabled; publication requires
+`workflow_dispatch`.
+
+## Release controls
+
+| Control | Where | Behaviour |
+| --- | --- | --- |
+| Manual publication | `.github/workflows/cd.yml` | Only `workflow_dispatch`; a push to `main` does not publish. |
+| Environment protection | GitHub environment `production` | Deployment branch policy allows `main` only. |
+| Git tag immutability | GitHub ruleset `immutable-release-tags` (`refs/tags/*`) | Blocks update, force-push and deletion of release tags. |
+| Image tag immutability | `cd.yml` step `Enforce immutable release tag` | Refuses to publish if the version tag already exists in Quay; `allow_republish=true` is the explicit override. |
+
+The environment uses a branch policy rather than required reviewers: GitHub does not let
+the user who triggered a run approve its deployment, and the repository has one maintainer.
+The manual dispatch remains the approval signal; the limitation is recorded in
+`blueprint/changes/p11-tag-immutable-env.md`.
 
 ## Environments
 Common examples:

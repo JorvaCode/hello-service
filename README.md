@@ -132,9 +132,9 @@ ejecución. El workflow usó autenticación OIDC y publicó en el namespace `ody
 - El registro local de `0.1.0` sigue en `blueprint/delivery/release-0.1.0.md`; los eventos
   remotos se registran en `blueprint/changes/p11-remote-publication.md`.
 - `cd.yml` ahora solo admite `workflow_dispatch`; un push a `main` no publica.
+- Se añaden controles de publicación: entorno `production` protegido por rama `main`, guardia de inmutabilidad por tag en Quay (se rechaza reutilizar un tag existente salvo `allow_republish=true`) y un ruleset de GitHub que protege `refs/tags/*`.
 
-El tag `0.1.0` es mutable: una ejecución manual posterior puede republicarlo con un digest
-nuevo. El digest actual es la identidad inmutable del artefacto remoto actual.
+El tag `0.1.0` queda protegido contra movimientos/borrados por ruleset; si ya existe en Quay, `cd.yml` lo rechaza por defecto. El digest es la identidad inmutable del artefacto.
 
 ## Observabilidad
 
@@ -181,8 +181,10 @@ feedback que lo originó.
   automático se eliminó y ahora solo admite `workflow_dispatch`.
 - La publicación remota tiene evidencia de ejecución y digest registrado. La promoción
   local de `0.1.0` sigue registrada y su rollback fue ejercitado.
-- No se ejecutó promoción remota a un segundo entorno ni rollback remoto; el tag `0.1.0`
-  es mutable.
+- No se ejecutó promoción remota a un segundo entorno ni rollback remoto. El tag Git
+  `refs/tags/*` está protegido por ruleset y la publicación rechaza reutilizar un tag
+  existente en Quay por defecto; el tag remoto `0.1.0` ya existente no se reescribe sin
+  `allow_republish=true` (decisión explícita del operador).
 - No hay readiness probe ni despliegue en staging o producción; `/api/status` es una señal
   de liveness.
 - No hay alertas automatizadas, métricas, trazas ni access log por petición; la detección de

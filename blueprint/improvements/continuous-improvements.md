@@ -17,6 +17,7 @@ improvement candidates below.
 | Closure scope | PoC with CI, local deployment and manual remote publication | Approved and retained |
 | Remote publication to Quay | Record the remote publication when `cd.yml` executes | Completed 2026-11-01 — current digest `quay.io/odysseia/hello-service:0.1.0@sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17`; CD runs 41332436297 and 41334455398 |
 | Residual risk of `cd.yml` | Document the risk and remove the automatic push trigger | Approved; `cd.yml` now requires `workflow_dispatch` |
+| Release tag immutability and environment protection | Protect Git tags and refuse an existing Quay tag by default; restrict CD to the `production` environment on `main` | Implemented 2026-11-02 — ruleset `immutable-release-tags`, environment `production`, and the `cd.yml` tag guard; record in `blueprint/changes/p11-tag-immutable-env.md` |
 | Independent review of `REQ-STATUS-001` | Record the absence of an independent reviewer; do not claim independent approval | Not performed — a non-independent review record exists in `blueprint/reviews/api-status-endpoint.md`; the delivery closure has a self-review in `blueprint/reviews/delivery-closure.md` |
 | Local execution | Verify and document a reproducible startup procedure | Completed 2026-10-30 — procedure and evidence in `blueprint/deployment/local-0.1.0.md` and `README.md` |
 | Local promotion and rollback | Record a local promotion of `0.1.0` and rehearse the rollback | Completed 2026-10-30 — `blueprint/delivery/release-0.1.0.md`; remote publications completed 2026-11-01 by CD runs 41332436297 and 41334455398 |
@@ -30,8 +31,11 @@ The remote publications of `0.1.0` were completed on 2026-11-01 by `cd.yml` runs
 41332436297 on `c7d3a86` and 41334455398 on `21772cc`; the current image and digest are
 recorded in `blueprint/changes/p11-remote-publication.md`. The local promotion remains
 recorded separately in `blueprint/delivery/release-0.1.0.md`. `cd.yml` now requires
-`workflow_dispatch`; automatic push publication is disabled. The remote publications do
-not close any deferred improvement item and do not change a requirement. The gate
+`workflow_dispatch`; automatic push publication is disabled. The release controls added on
+2026-11-02 protect Git tags, refuse an existing Quay tag by default and restrict CD to the
+`production` environment on `main`; they are recorded in
+`blueprint/changes/p11-tag-immutable-env.md`. The remote publications and the release
+controls do not close any deferred improvement item and do not change a requirement. The gate
 identifiers P-02, P-06, P-07, P-10, P-11, P-13 and P-14 are defined in
 `blueprint/gates.md`.
 
