@@ -24,8 +24,9 @@ improvement candidates below.
 | `CHANGELOG.md` | Do not create | Approved |
 | Blueprint formal validation | Do not claim validation | Remains `NOT VERIFIED` |
 | Gates P-02, P-06, P-07, P-10, P-11, P-13 and P-14 | Do not close a gate without its evidence; record independence limitations | P-02, P-06, P-07, P-10, P-11, P-13 and P-14 closed; P-02, P-07, P-11, P-13 and P-14 closed with solo-maintainer self-review and no independent approval |
-| Real CI execution | Record the successful GitHub Actions runs | Completed — run 10 on `6ccd170`, run 13 on `2e54476`, run 41220748392 on `0fbaffc`, run 41225786925 on `195d40c`, runs 41332436321/41332436297 on `c7d3a86`, and runs 41334455181/41334455398 on `21772cc` concluded `success` |
-| IMP-001 … IMP-005 | Keep as `Deferred` | No implementation; each item now names an owner, an artifact and its feedback source |
+| Real CI execution | Record the successful GitHub Actions runs | Completed — run 10 on `6ccd170`, run 13 on `2e54476`, run 41220748392 on `0fbaffc`, run 41225786925 on `195d40c`, runs 41332436321/41332436297 on `c7d3a86`, runs 41334455181/41334455398 on `21772cc` and run 41610069726 on `8ea03d9` concluded `success` |
+| IMP-002 dependency vulnerability scan | Add a pinned Trivy scan over a committed Gradle lockfile; fail on HIGH/CRITICAL and record accepted findings | Implemented 2026-11-02 — `gradle.lockfile`, Trivy `0.76.1` in `ci.yml`, `.trivyignore`; record in `blueprint/changes/p10-dependency-scan.md` |
+| IMP-001, IMP-003 … IMP-005 | Keep as `Deferred` | No implementation; each item now names an owner, an artifact and its feedback source |
 
 The remote publications of `0.1.0` were completed on 2026-11-01 by `cd.yml` runs
 41332436297 on `c7d3a86` and 41334455398 on `21772cc`; the current image and digest are
@@ -48,7 +49,7 @@ identifiers P-02, P-06, P-07, P-10, P-11, P-13 and P-14 are defined in
 | User feedback | No external user feedback available | Capture feedback when the service is consumed by users |
 | Retrospectives | Blueprint phases reviewed during implementation | Keep phase-by-phase review practice |
 | Technical debt | Phase 13 record: no access log and no automated alerting | Keep `IMP-004` and `IMP-005` deferred |
-| Security findings | CI runs gitleaks but no dependency vulnerability scan | Keep `IMP-002` deferred |
+| Security findings | CI runs gitleaks and a Trivy dependency scan over `gradle.lockfile`; two accepted `spring-webmvc` criticals are recorded in `.trivyignore` | Keep `IMP-002` implemented; review accepted findings when Spring Framework 7 is adopted |
 | Performance findings | No performance issue identified | Reassess if traffic or processing complexity increases |
 | Operational feedback | Phase 13 record: no readiness probe | Keep `IMP-003` deferred |
 
@@ -118,7 +119,7 @@ Evaluate adding automated security and dependency vulnerability checks to the CI
 **Potential impact:**
 CI/CD and security validation.
 
-**Status:** Deferred — no implementation; loop open.
+**Status:** Implemented 2026-11-02 — pinned Trivy scan over committed `gradle.lockfile`, fail on HIGH/CRITICAL, accepted findings in `.trivyignore`, reports uploaded. GitHub Actions run 41610069726 on `8ea03d9` passed with the `trivy-report` artifact. Loop closed by implementation.
 
 ---
 
@@ -191,8 +192,9 @@ Implementation, tests and log-injection review.
 
 ## Lifecycle Changes
 
-No normative phase document, standard, template or ADR is changed by this phase. The five
-improvement items are deferred and none revises a requirement. The project-specific phase
+No normative phase document, standard, template or ADR is changed by this phase. At phase 14
+closure, the five improvement items were deferred and none revised a requirement; `IMP-002`
+was implemented later under phase 10. The project-specific phase
 records (`blueprint/14-continuous-improvement.md`, `blueprint/gates.md` and `README.md`) are
 updated to record this phase; that is not a change to the lifecycle's normative text. If an
 item is implemented, it enters the lifecycle at the phase named in its "Artifact changed"
@@ -216,6 +218,14 @@ Post-closure events (2026-11-01): merging PR #5 triggered `cd.yml` on `c7d3a86`;
 first. `cd.yml` now requires `workflow_dispatch`; automatic push publication is disabled.
 These events are recorded in `blueprint/changes/p11-remote-publication.md`. They do not
 change the deferred status of `IMP-001` … `IMP-005` or the phase 14 gate verdict.
+
+Post-closure implementation (2026-11-02): `IMP-002` was implemented by the dependency
+vulnerability scan in `.github/workflows/ci.yml`. The committed `gradle.lockfile`,
+`.trivyignore` and `blueprint/changes/p10-dependency-scan.md` record the change, and the
+scan evidence is attached to CI run 41610069726 on `8ea03d9`. This closes the
+`IMP-002` loop. The phase 14 gate remains `CLOSED` because its closure record and evidence
+are unchanged; the implementation is recorded against phase 10, the artifact named by
+`IMP-002`.
 
 ## Phase 14 Gate
 

@@ -16,3 +16,5 @@ bin/
 *.log
 
 gitleaks-report.json
+trivy-report.txt
+trivy-report.json

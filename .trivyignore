@@ -1,0 +1,9 @@
+# Accepted findings. Review when Spring Boot 4 / Spring Framework 7 is adopted.
+
+# CVE-2026-47884: XsltView path limitation issue, fixed in Spring Framework 7.0.9.
+# hello-service does not configure XsltView or XML view resolution.
+CVE-2026-47884
+
+# CVE-2026-47890: SSE view stream corruption, fixed in Spring Framework 7.0.9.
+# hello-service does not expose Server-Sent Events or streaming views.
+CVE-2026-47890
