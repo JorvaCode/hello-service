@@ -53,6 +53,10 @@
   fixed only in Spring Framework 7.0.9, with the reason they do not apply to this service.
 - The lockfile and build overrides pin Tomcat `10.1.59`, Spring Framework `6.2.19` and
   Jackson BOM `2.21.7` while the Spring Boot plugin stays on `3.5.14`.
+- Result: GitHub Actions run 41610069726 on `8ea03d9` completed with `success`; the
+  `Dependency vulnerability scan` step passed with `.trivyignore` applied and uploaded the
+  `trivy-report` artifact. No unaccepted HIGH or CRITICAL finding was reported.
+- Evidence: `https://github.com/JorvaCode/hello-service/actions/runs/41610069726`.
 
 ## Gate
 

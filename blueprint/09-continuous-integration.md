@@ -53,3 +53,6 @@ manual dispatch. The required checks are:
 - Accepted findings live in `.trivyignore` with a rationale and a review trigger. Current
   entries are two `spring-webmvc` criticals fixed only in Spring Framework 7.0.9; the
   service does not use XsltView or Server-Sent Events.
+- Result: GitHub Actions run 41610069726 on `8ea03d9` completed with `success` and the
+  `Dependency vulnerability scan` step passed; the `trivy-report` artifact is attached.
+- Evidence: `https://github.com/JorvaCode/hello-service/actions/runs/41610069726`.

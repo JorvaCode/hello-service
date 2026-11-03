@@ -24,7 +24,7 @@ improvement candidates below.
 | `CHANGELOG.md` | Do not create | Approved |
 | Blueprint formal validation | Do not claim validation | Remains `NOT VERIFIED` |
 | Gates P-02, P-06, P-07, P-10, P-11, P-13 and P-14 | Do not close a gate without its evidence; record independence limitations | P-02, P-06, P-07, P-10, P-11, P-13 and P-14 closed; P-02, P-07, P-11, P-13 and P-14 closed with solo-maintainer self-review and no independent approval |
-| Real CI execution | Record the successful GitHub Actions runs | Completed — run 10 on `6ccd170`, run 13 on `2e54476`, run 41220748392 on `0fbaffc`, run 41225786925 on `195d40c`, runs 41332436321/41332436297 on `c7d3a86`, and runs 41334455181/41334455398 on `21772cc` concluded `success` |
+| Real CI execution | Record the successful GitHub Actions runs | Completed — run 10 on `6ccd170`, run 13 on `2e54476`, run 41220748392 on `0fbaffc`, run 41225786925 on `195d40c`, runs 41332436321/41332436297 on `c7d3a86`, runs 41334455181/41334455398 on `21772cc` and run 41610069726 on `8ea03d9` concluded `success` |
 | IMP-002 dependency vulnerability scan | Add a pinned Trivy scan over a committed Gradle lockfile; fail on HIGH/CRITICAL and record accepted findings | Implemented 2026-11-02 — `gradle.lockfile`, Trivy `0.76.1` in `ci.yml`, `.trivyignore`; record in `blueprint/changes/p10-dependency-scan.md` |
 | IMP-001, IMP-003 … IMP-005 | Keep as `Deferred` | No implementation; each item now names an owner, an artifact and its feedback source |
 
@@ -119,7 +119,7 @@ Evaluate adding automated security and dependency vulnerability checks to the CI
 **Potential impact:**
 CI/CD and security validation.
 
-**Status:** Implemented 2026-11-02 — pinned Trivy scan over committed `gradle.lockfile`, fail on HIGH/CRITICAL, accepted findings in `.trivyignore`, reports uploaded. Loop closed by implementation.
+**Status:** Implemented 2026-11-02 — pinned Trivy scan over committed `gradle.lockfile`, fail on HIGH/CRITICAL, accepted findings in `.trivyignore`, reports uploaded. GitHub Actions run 41610069726 on `8ea03d9` passed with the `trivy-report` artifact. Loop closed by implementation.
 
 ---
 
@@ -222,7 +222,7 @@ change the deferred status of `IMP-001` … `IMP-005` or the phase 14 gate verdi
 Post-closure implementation (2026-11-02): `IMP-002` was implemented by the dependency
 vulnerability scan in `.github/workflows/ci.yml`. The committed `gradle.lockfile`,
 `.trivyignore` and `blueprint/changes/p10-dependency-scan.md` record the change, and the
-scan evidence is attached to the CI run for the implementing commit. This closes the
+scan evidence is attached to CI run 41610069726 on `8ea03d9`. This closes the
 `IMP-002` loop. The phase 14 gate remains `CLOSED` because its closure record and evidence
 are unchanged; the implementation is recorded against phase 10, the artifact named by
 `IMP-002`.

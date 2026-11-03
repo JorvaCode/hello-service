@@ -35,7 +35,7 @@ Not significant. No architecture decision is introduced or changed.
 
 - Local: `.\gradlew.bat clean build --write-locks --no-daemon --console=plain` succeeds.
 - Local: `trivy fs --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 gradle.lockfile` exits 0 with current `.trivyignore`.
-- CI: run for this change shows `Dependency vulnerability scan` green and `trivy-report` artifacts uploaded.
+- CI: run 41610069726 on `8ea03d9` shows `Dependency vulnerability scan` `success` and the `trivy-report` artifact uploaded.
 
 | Criterion | Level | Check that verifies it |
 | --- | --- | --- |
