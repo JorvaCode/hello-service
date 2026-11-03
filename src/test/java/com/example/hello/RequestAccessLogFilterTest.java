@@ -14,6 +14,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RequestAccessLogFilterTest {
 
@@ -79,5 +80,25 @@ class RequestAccessLogFilterTest {
         assertThat(appender.list.get(0).getFormattedMessage())
                 .contains("path=/api/hello")
                 .doesNotContain("token=secret");
+    }
+
+    @Test
+    void logsStatus500AndRethrowsWhenChainFails() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/hello");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        assertThatThrownBy(() ->
+                new RequestAccessLogFilter().doFilter(request, response, (loggedRequest, loggedResponse) -> {
+                    throw new IllegalStateException("boom");
+                }))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("boom");
+
+        assertThat(appender.list).hasSize(1);
+        assertThat(appender.list.get(0).getFormattedMessage())
+                .contains("method=GET")
+                .contains("path=/api/hello")
+                .contains("status=500")
+                .contains("requestId=-");
     }
 }

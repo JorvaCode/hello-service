@@ -45,4 +45,22 @@ class ActuatorEndpointTest {
         assertThat(response.getBody()).contains("jvm_memory_used_bytes");
         assertThat(response.getBody()).contains("application=\"hello-service\"");
     }
+
+    @Test
+    void healthEndpointDoesNotDiscloseDetails() {
+        ResponseEntity<String> response = restTemplate.getForEntity(
+                "/actuator/health", String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).contains("\"status\":\"UP\"");
+        assertThat(response.getBody()).doesNotContain("\"components\"");
+    }
+
+    @Test
+    void unapprovedActuatorEndpointIsNotExposed() {
+        ResponseEntity<String> response = restTemplate.getForEntity(
+                "/actuator/env", String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
 }
