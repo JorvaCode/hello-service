@@ -27,6 +27,8 @@
 - Reproducibility: archive timestamps are disabled and file order is fixed in
   `build.gradle.kts`.
 - The Dockerfile pins the base image by digest.
+- Dependency locking is enabled; `gradle.lockfile` is committed and used by CI so the
+  scanned dependency set matches the built artifact.
 
 ## Secret scan
 
@@ -39,6 +41,18 @@
   `--exit-code 1`, so its success means no finding was reported. The `gitleaks-report`
   artifact (159 bytes) is attached to the run.
 - Evidence: `https://github.com/JorvaCode/hello-service/actions/runs/41046888744`.
+
+## Dependency scan
+
+- Tool: Trivy `0.76.1`, pinned by version and SHA-256 of the release archive.
+- Target: `gradle.lockfile`, with `--scanners vuln --severity HIGH,CRITICAL
+  --ignore-unfixed --exit-code 1`.
+- Reports: `trivy-report.txt` and `trivy-report.json`, uploaded as the `trivy-report`
+  artifact and summarized in the workflow step summary.
+- Accepted findings: `.trivyignore` records the two `spring-webmvc` criticals that are
+  fixed only in Spring Framework 7.0.9, with the reason they do not apply to this service.
+- The lockfile and build overrides pin Tomcat `10.1.59`, Spring Framework `6.2.19` and
+  Jackson BOM `2.21.7` while the Spring Boot plugin stays on `3.5.14`.
 
 ## Gate
 

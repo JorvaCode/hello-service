@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.5.3"
+    id("org.springframework.boot") version "3.5.14"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -15,6 +15,14 @@ java {
 
 repositories {
     mavenCentral()
+}
+
+extra["tomcat.version"] = "10.1.59"
+extra["spring-framework.version"] = "6.2.19"
+extra["jackson-bom.version"] = "2.21.7"
+
+dependencyLocking {
+    lockAllConfigurations()
 }
 
 dependencies {

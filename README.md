@@ -105,8 +105,8 @@ esa aprobación sigue pendiente y no debe presentarse como obtenida.
 
 | Área | Evidencia de configuración | Evidencia de ejecución real | Estado |
 |---|---|---|---|
-| CI | `.github/workflows/ci.yml` define un único job de build/test, construcción de la imagen y registro de su identidad; no contiene ruta de publicación | Ejecución real registrada: run 13 sobre `2e54476`, conclusión `success`, artefactos `artifact-metadata`, `hello-service-0.1.0` y `gitleaks-report` | Configuración validada por ejecución real; CI-02 `VERIFICADO` |
-| Packaging | Versión `0.1.0`, JAR ejecutable, imagen OCI con labels de procedencia, identidad y escaneo gitleaks | Run 13: artefactos `artifact-metadata`, `hello-service-0.1.0` y `gitleaks-report`; conclusión `success` | P-10 `CLOSED` |
+| CI | `.github/workflows/ci.yml` define un único job de build/test, escaneo de secretos, escaneo de vulnerabilidades de dependencias sobre `gradle.lockfile`, construcción de la imagen y registro de su identidad; no contiene ruta de publicación | Ejecución real registrada: run 13 sobre `2e54476`, conclusión `success`, artefactos `artifact-metadata`, `hello-service-0.1.0` y `gitleaks-report`; el escaneo Trivy se valida en el run del PR que introduce este cambio | Configuración validada por ejecución real del build y gitleaks; escaneo de dependencias añadido |
+| Packaging | Versión `0.1.0`, JAR ejecutable, imagen OCI con labels de procedencia, identidad, escaneo gitleaks y escaneo Trivy de dependencias con lockfile | Run 13: artefactos `artifact-metadata`, `hello-service-0.1.0` y `gitleaks-report`; el run del PR añade `trivy-report` | P-10 `CLOSED`; evidencia de escaneo de dependencias en curso |
 | Pruebas locales | Gradle Wrapper y suite automatizada | Ejecución registrada de 17 tests sobre `f2b03e5`, `72c2ad5` y `870500c` | Ejecución local documentada y repetida sobre el `HEAD` del cierre |
 | Despliegue local | `Dockerfile` OCI, usuario no-root, puerto `8080` y entrypoint del JAR | Procedimiento reproducible verificado el 2026-10-30: build local, imagen `0.1.0`, contenedor como `appuser`, probes en `127.0.0.1:18080` y rollback a `0.0.1-SNAPSHOT` | Procedimiento verificado; registro en `blueprint/deployment/local-0.1.0.md` |
 | Release local / P-11 | Versión `0.1.0`, imagen local y rollback a `0.0.1-SNAPSHOT` | Promoción local registrada el 2026-10-30; rollback ejercitado | P-11 `CLOSED` con autoevaluación; publicaciones remotas registradas; sin aprobación independiente |
@@ -159,13 +159,15 @@ El registro de mejora continua está en
 (`IMP-001` … `IMP-005`) nombra un propietario, el artefacto que cambiaría y la fuente de
 feedback que lo originó.
 
-- Los cinco items siguen `Deferred`; no se implementó ninguno en esta fase.
+- `IMP-002` se implementó el 2026-11-02 con un escaneo Trivy sobre `gradle.lockfile`;
+  `IMP-001`, `IMP-003`, `IMP-004` e `IMP-005` siguen `Deferred`.
 - No hay revisión de requisito ni versión nueva; `0.1.0` sigue siendo la versión
   entregada, ahora también publicada en Quay.
 - El cierre de la fase 14 está en el registro y en
   `blueprint/reviews/continuous-improvement-closure.md`; es una autoevaluación del
   mantenedor, no una aprobación independiente.
-- Los bucles de mejora de `IMP-001` … `IMP-005` permanecen abiertos.
+- El bucle de `IMP-002` queda cerrado; los bucles de `IMP-001`, `IMP-003`, `IMP-004` e
+  `IMP-005` permanecen abiertos.
 
 ## Limitaciones conocidas
 
@@ -189,8 +191,11 @@ feedback que lo originó.
   de liveness.
 - No hay alertas automatizadas, métricas, trazas ni access log por petición; la detección de
   la fase 13 es manual y el runbook está en `blueprint/observability/hello-service.md`.
-- Los items de mejora `IMP-001` … `IMP-005` siguen diferidos; sus bucles de mejora no están
-  cerrados y no se declara ninguna mejora entregada.
+- `IMP-002` está implementado y su bucle cerrado; `IMP-001` … `IMP-005` menos `IMP-002`
+  siguen diferidos y no se declara ninguna otra mejora entregada.
+- El escaneo de dependencias acepta dos CVEs críticos de `spring-webmvc` en `.trivyignore`
+  porque el servicio no usa `XsltView` ni Server-Sent Events y la corrección requiere
+  Spring Framework 7.0.9.
 
 ## Documentación
 

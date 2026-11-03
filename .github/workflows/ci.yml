@@ -57,6 +57,52 @@ jobs:
       - name: Build and test
         run: ./gradlew clean build --no-daemon --console=plain
 
+      - name: Dependency vulnerability scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          trivy_version="0.76.1"
+          trivy_sha256="c7cbe3137fb8a48a17574bede3dd6beb16742d1e9772929940fc90082c39d9c0"
+          mkdir -p "$RUNNER_TEMP/trivy"
+          curl -sSfL \
+            "https://github.com/aquasecurity/trivy/releases/download/v${trivy_version}/trivy_${trivy_version}_Linux-64bit.tar.gz" \
+            -o "$RUNNER_TEMP/trivy.tar.gz"
+          echo "${trivy_sha256}  ${RUNNER_TEMP}/trivy.tar.gz" | sha256sum -c -
+          tar -xz -C "$RUNNER_TEMP/trivy" -f "$RUNNER_TEMP/trivy.tar.gz" trivy
+
+          set +e
+          "$RUNNER_TEMP/trivy/trivy" fs \
+            --scanners vuln \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --exit-code 1 \
+            --format table \
+            --output trivy-report.txt \
+            gradle.lockfile
+          trivy_exit=$?
+          "$RUNNER_TEMP/trivy/trivy" fs \
+            --scanners vuln \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --format json \
+            --output trivy-report.json \
+            gradle.lockfile
+          set -e
+
+          critical="$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' trivy-report.json)"
+          high="$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH")] | length' trivy-report.json)"
+          {
+            echo "### Dependency vulnerability scan"
+            echo ""
+            echo "| Severity | Count |"
+            echo "| --- | --- |"
+            echo "| CRITICAL | ${critical} |"
+            echo "| HIGH | ${high} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          cat trivy-report.txt
+          exit "$trivy_exit"
+
       - name: Build container image
         shell: bash
         run: |
@@ -105,5 +151,16 @@ jobs:
         with:
           name: gitleaks-report
           path: gitleaks-report.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload dependency scan report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: |
+            trivy-report.txt
+            trivy-report.json
           if-no-files-found: warn
           retention-days: 30
