@@ -1,8 +1,11 @@
 package com.example.hello;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -33,6 +36,16 @@ public class RequestAccessLogFilter implements Filter {
 
     private static final Logger log = LoggerFactory.getLogger(RequestAccessLogFilter.class);
 
+    private final Counter missingRequestId;
+
+    public RequestAccessLogFilter(Optional<MeterRegistry> meterRegistry) {
+        this.missingRequestId = meterRegistry
+                .map(registry -> Counter.builder("hello_service_access_log_missing_request_id")
+                        .description("Access-log entries emitted without a request id")
+                        .register(registry))
+                .orElse(null);
+    }
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -50,13 +63,19 @@ public class RequestAccessLogFilter implements Filter {
         } finally {
             long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt);
             String requestId = MDC.get(RequestIdFilter.MDC_REQUEST_ID_KEY);
+            if (requestId == null || requestId.isBlank()) {
+                if (missingRequestId != null) {
+                    missingRequestId.increment();
+                }
+                requestId = "-";
+            }
             log.info(
                     "access method={} path={} status={} duration_ms={} requestId={}",
                     httpRequest.getMethod(),
                     httpRequest.getRequestURI(),
                     status,
                     durationMs,
-                    requestId == null || requestId.isBlank() ? "-" : requestId);
+                    requestId);
         }
     }
 }

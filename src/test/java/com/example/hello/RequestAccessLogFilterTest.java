@@ -1,8 +1,11 @@
 package com.example.hello;
 
+import java.util.Optional;
+
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,10 +23,12 @@ class RequestAccessLogFilterTest {
 
     private final Logger logger = (Logger) LoggerFactory.getLogger(RequestAccessLogFilter.class);
     private final ListAppender<ILoggingEvent> appender = new ListAppender<>();
+    private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
 
     @BeforeEach
     void attachAppender() {
         MDC.clear();
+        meterRegistry.clear();
         appender.start();
         logger.addAppender(appender);
     }
@@ -41,7 +46,7 @@ class RequestAccessLogFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         new RequestIdFilter().doFilter(request, response, (idRequest, idResponse) ->
-                new RequestAccessLogFilter().doFilter(idRequest, idResponse, (loggedRequest, loggedResponse) ->
+                new RequestAccessLogFilter(Optional.of(meterRegistry)).doFilter(idRequest, idResponse, (loggedRequest, loggedResponse) ->
                         ((HttpServletResponse) loggedResponse).setStatus(200)));
 
         assertThat(appender.list).hasSize(1);
@@ -58,7 +63,7 @@ class RequestAccessLogFilterTest {
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/hello");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        new RequestAccessLogFilter().doFilter(request, response, (loggedRequest, loggedResponse) ->
+        new RequestAccessLogFilter(Optional.of(meterRegistry)).doFilter(request, response, (loggedRequest, loggedResponse) ->
                 ((HttpServletResponse) loggedResponse).setStatus(500));
 
         assertThat(appender.list).hasSize(1);
@@ -74,7 +79,7 @@ class RequestAccessLogFilterTest {
         request.setQueryString("token=secret");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        new RequestAccessLogFilter().doFilter(request, response, (loggedRequest, loggedResponse) ->
+        new RequestAccessLogFilter(Optional.of(meterRegistry)).doFilter(request, response, (loggedRequest, loggedResponse) ->
                 ((HttpServletResponse) loggedResponse).setStatus(200));
 
         assertThat(appender.list.get(0).getFormattedMessage())
@@ -83,12 +88,26 @@ class RequestAccessLogFilterTest {
     }
 
     @Test
+    void countsEntriesWithoutRequestId() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/hello");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        new RequestAccessLogFilter(Optional.of(meterRegistry)).doFilter(request, response,
+                (loggedRequest, loggedResponse) -> ((HttpServletResponse) loggedResponse).setStatus(200));
+
+        assertThat(meterRegistry.get("hello_service_access_log_missing_request_id")
+                .counter()
+                .count())
+                .isEqualTo(1.0);
+    }
+
+    @Test
     void logsStatus500AndRethrowsWhenChainFails() {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/hello");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         assertThatThrownBy(() ->
-                new RequestAccessLogFilter().doFilter(request, response, (loggedRequest, loggedResponse) -> {
+                new RequestAccessLogFilter(Optional.of(meterRegistry)).doFilter(request, response, (loggedRequest, loggedResponse) -> {
                     throw new IllegalStateException("boom");
                 }))
                 .isInstanceOf(IllegalStateException.class)

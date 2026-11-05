@@ -99,3 +99,16 @@ groups:
             The blackbox probe for GET /api/hello has not returned 200 for
             2 minutes. Confirm the status code and the response body.
           runbook_url: https://github.com/JorvaCode/hello-service/blob/main/blueprint/observability/hello-service.md#rb-03
+
+      - alert: HelloServiceCorrelationMissing
+        expr: increase(hello_service_access_log_missing_request_id_total{job="hello-service"}[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          service: hello-service
+        annotations:
+          summary: hello-service access log is missing request correlation
+          description: >-
+            At least one access-log line in the last 5 minutes had no requestId.
+            Inspect RequestIdFilter ordering and the request path.
+          runbook_url: https://github.com/JorvaCode/hello-service/blob/main/blueprint/observability/hello-service.md#rb-07

@@ -28,7 +28,8 @@ class AlertRulesTest {
             "HelloServiceRestarting",
             "HelloServiceLivenessProbeFailing",
             "HelloServiceReadinessProbeFailing",
-            "HelloServiceHelloContractFailing");
+            "HelloServiceHelloContractFailing",
+            "HelloServiceCorrelationMissing");
 
     @Test
     void rulesCoverFailureModesAndNameResponse() throws Exception {
