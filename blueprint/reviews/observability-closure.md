@@ -123,6 +123,17 @@ observability scope is still local and manual; the remote publications did not a
 automated alerting, metrics, traces or a readiness probe. Phase 13 CI run 41220748392 later
 concluded `success`.
 
+## Post-closure update (2026-11-06)
+
+`CHG-OBS-002` implements `IMP-001`, `IMP-003`, `IMP-004` and `IMP-005` under
+`REQ-OBS-001`/`REQ-OBS-002` and ADR-014. `F-2` is partially addressed: metrics now exist at
+`/actuator/prometheus` and eight alert rules are defined under `ops/prometheus/`, but no
+Prometheus, Alertmanager, backend, paging path or trace collector is deployed, so no rule is
+evaluated or routed. `F-3` and `F-4` are addressed by the correlated access log and the
+Actuator liveness/readiness probes. The implementation is reviewed separately in
+`blueprint/reviews/observability-improvements.md`; this original review keeps its verdict for
+the phase 13 commit and does not claim an independent approval.
+
 ## Reviewer, independence and date
 
 - Reviewer: OpenCode review assistant. It produced the observability records in this

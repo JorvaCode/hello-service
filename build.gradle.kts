@@ -20,13 +20,16 @@ repositories {
 extra["tomcat.version"] = "10.1.59"
 extra["spring-framework.version"] = "6.2.19"
 extra["jackson-bom.version"] = "2.21.7"
+extra["micrometer.version"] = "1.15.12"
 
 dependencyLocking {
     lockAllConfigurations()
 }
 
 dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("io.micrometer:micrometer-registry-prometheus")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

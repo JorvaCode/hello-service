@@ -80,12 +80,20 @@ El flag `--offline` requiere que las dependencias estén disponibles en la cach�
 No se documenta una variante equivalente para otros shells que incluya los mismos
 parámetros que el comando de PowerShell.
 
-Resultado registrado en `blueprint/testing/api-status-endpoint.md`:
+Resultado histórico en `blueprint/testing/api-status-endpoint.md`:
 
 - `BUILD SUCCESSFUL`.
 - 17 tests, 0 fallos, 0 errores, 0 omitidos.
 - Base histórica: commit `f2b03e5f8d8306192922051dbf6359e23a9a0ee2`, fecha 2026-10-27.
 - Repetición: 17 tests sobre `870500c` el 2026-10-30, como parte de la promoción local.
+
+Resultado actual en `blueprint/testing/observability-improvements.md`:
+
+- `BUILD SUCCESSFUL`.
+- 28 tests, 0 fallos, 0 errores, 0 omitidos.
+- Commit `37533139e1c950d49050eb584c2d9e0e3de4e932`, fecha 2026-11-06.
+- Añade 11 pruebas de Actuator, probes, exposición, access log, contador de correlación y
+  reglas de alerta; run 42239560605 en `fc69901`, `success`.
 
 ## Endpoints implementados
 
@@ -93,9 +101,13 @@ Resultado registrado en `blueprint/testing/api-status-endpoint.md`:
 |---|---|---|
 | `GET /api/hello` | `200`, `text/plain`, cuerpo `Hello, World!`; métodos no soportados `405`; ruta desconocida `404` | `blueprint/requirements/hello-endpoint.md`, `blueprint/reviews/hello-endpoint.md` |
 | `GET /api/status` | `200`, `application/json`, cuerpo exacto `{"status":"UP"}`, `X-Request-ID`; `HEAD`/`OPTIONS` permitidos; métodos no soportados `405` con `Allow` que contiene `GET` | `blueprint/requirements/api-status-endpoint.md`, `blueprint/testing/api-status-endpoint.md` |
+| `GET /actuator/health/liveness` y `GET /actuator/health/readiness` | `200` y cuerpo con `"status":"UP"` cuando el contexto está listo; readiness no comprueba dependencias externas porque no existen | `blueprint/testing/observability-improvements.md`, ADR-014 |
+| `GET /actuator/prometheus` | `200`, formato Prometheus, métricas JVM y etiqueta `application="hello-service"` | `blueprint/testing/observability-improvements.md`, ADR-014 |
 
-`/api/status` es una señal de liveness, no un readiness check ni un health check de
-dependencias.
+`/api/status` es una señal de liveness de la aplicación, no un readiness check ni un health
+check de dependencias. `/actuator/health/readiness` es la señal separada para orquestadores.
+Los endpoints de Actuator no están autenticados en el límite local; `health` oculta detalles y
+`/actuator/env` no está expuesto (`404`).
 
 `REQ-HELLO-001` y `REQ-STATUS-001` tienen registro de revisión. La revisión de
 `REQ-STATUS-001` la realizó el asistente OpenCode, no un revisor humano independiente;
@@ -105,13 +117,13 @@ esa aprobación sigue pendiente y no debe presentarse como obtenida.
 
 | Área | Evidencia de configuración | Evidencia de ejecución real | Estado |
 |---|---|---|---|
-| CI | `.github/workflows/ci.yml` define un único job de build/test, escaneo de secretos, escaneo de vulnerabilidades de dependencias sobre `gradle.lockfile`, construcción de la imagen y registro de su identidad; no contiene ruta de publicación | Run 13 sobre `2e54476` y run 41610069726 sobre `8ea03d9`, ambos `success`; el segundo añade el paso `Dependency vulnerability scan` y el artefacto `trivy-report` | Configuración validada por ejecución real; escaneo de dependencias `VERIFICADO` |
+| CI | `.github/workflows/ci.yml` define un único job de build/test, escaneo de secretos, escaneo de vulnerabilidades de dependencias sobre `gradle.lockfile`, construcción de la imagen y registro de su identidad; no contiene ruta de publicación | Run 13 sobre `2e54476` y run 41610069726 sobre `8ea03d9`, ambos `success`; run 42239560605 sobre `fc69901`, `success` con `micrometer.version=1.15.12` | Configuración validada por ejecución real; escaneo de dependencias `VERIFICADO` |
 | Packaging | Versión `0.1.0`, JAR ejecutable, imagen OCI con labels de procedencia, identidad, escaneo gitleaks y escaneo Trivy de dependencias con lockfile | Run 13: `artifact-metadata`, `hello-service-0.1.0` y `gitleaks-report`; run 41610069726 añade `trivy-report` | P-10 `CLOSED`; escaneo de dependencias `VERIFICADO` |
-| Pruebas locales | Gradle Wrapper y suite automatizada | Ejecución registrada de 17 tests sobre `f2b03e5`, `72c2ad5` y `870500c` | Ejecución local documentada y repetida sobre el `HEAD` del cierre |
+| Pruebas locales | Gradle Wrapper y suite automatizada | 17 tests históricos sobre `f2b03e5`, `72c2ad5` y `870500c`; 28 tests sobre `3753313` el 2026-11-06 | Suite actual verde; run 42239560605 sobre `fc69901`, `success` |
 | Despliegue local | `Dockerfile` OCI, usuario no-root, puerto `8080` y entrypoint del JAR | Procedimiento reproducible verificado el 2026-10-30: build local, imagen `0.1.0`, contenedor como `appuser`, probes en `127.0.0.1:18080` y rollback a `0.0.1-SNAPSHOT` | Procedimiento verificado; registro en `blueprint/deployment/local-0.1.0.md` |
 | Release local / P-11 | Versión `0.1.0`, imagen local y rollback a `0.0.1-SNAPSHOT` | Promoción local registrada el 2026-10-30; rollback ejercitado | P-11 `CLOSED` con autoevaluación; publicaciones remotas registradas; sin aprobación independiente |
-| Observabilidad / P-13 | Logs estructurados con `requestId`, `/api/status` liveness y runbook manual; sin métricas, trazas ni alertas automatizadas | Registro en `blueprint/observability/hello-service.md`; prueba de correlación y runbook el 2026-10-30; 17 tests verdes en la revisión | P-13 `CLOSED` con detección manual; sin aprobación independiente |
-| Mejora continua / P-14 | Registro de mejoras con propietario, artefacto y fuente de feedback; `IMP-001` … `IMP-005` diferidos | Registro y cierre en `blueprint/improvements/continuous-improvements.md`; revisión en `blueprint/reviews/continuous-improvement-closure.md` | P-14 `CLOSED` para el registro; bucles de mejora abiertos; sin aprobación independiente |
+| Observabilidad / P-13 | Logs estructurados con `requestId`, `/api/status` liveness, Actuator liveness/readiness, métricas Prometheus, access log correlacionado y ocho reglas de alerta Prometheus; sin Prometheus/Alertmanager desplegados, dashboard ni evaluación | Registro en `blueprint/observability/hello-service.md`; 28 tests en `blueprint/testing/observability-improvements.md`; reglas en `ops/prometheus/hello-service-alerts.yml`; correlación y runbook verificados el 2026-10-30 | P-13 `CLOSED` con señales automatizadas y alertas definidas; evaluación y paging manuales; sin aprobación independiente |
+| Mejora continua / P-14 | Registro de mejoras con propietario, artefacto y fuente de feedback; `IMP-001`, `IMP-003`, `IMP-004` e `IMP-005` implementados post-cierre; `IMP-004` a nivel de definición | Registro y cierre en `blueprint/improvements/continuous-improvements.md`; revisiones `continuous-improvement-closure.md` y `observability-improvements.md` | P-14 `CLOSED` para el registro; todos los bucles cerrados, `IMP-004` sin stack desplegado; sin aprobación independiente |
 | CD / Quay | `.github/workflows/cd.yml` contiene pasos de OIDC, login y push a Quay; el único disparador es `workflow_dispatch` | Runs 41332436297 sobre `c7d3a86` y 41334455398 sobre `21772cc`: `success`; imagen `quay.io/odysseia/hello-service:0.1.0`, digest actual `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17`, deploy por digest y smoke test `GET /api/hello` -> `200` | Publicación remota completada; publicación automática deshabilitada; promoción a segundo entorno no ejecutada; sin rollback remoto |
 
 ## Publicación remota
@@ -140,17 +152,24 @@ El tag `0.1.0` queda protegido contra movimientos/borrados por ruleset; si ya ex
 
 El registro de observabilidad de la PoC local está en
 `blueprint/observability/hello-service.md`. Documenta el contexto de operación, los logs
-estructurados, la correlación por `X-Request-ID`, la señal de liveness `/api/status`, siete
-modos de fallo y un runbook con ocho procedimientos.
+estructurados, la correlación por `X-Request-ID`, la señal de liveness `/api/status`, las
+probes de Actuator, las métricas Prometheus, el access log, ocho reglas de alerta, siete modos
+de fallo y un runbook con nueve procedimientos.
 
-- La detección es manual: no hay alertas automatizadas, métricas, trazas ni readiness probe.
+- La instrumentación es automática (probes, métricas y access log) y las reglas de alerta están
+  definidas en `ops/prometheus/hello-service-alerts.yml`; no hay Prometheus, Alertmanager,
+  blackbox exporter, dashboard, backend de métricas ni paging desplegados, así que ninguna regla
+  se evalúa ni se enruta.
+- El access log emite una línea INFO por petición con método, path, estado, duración y
+  `requestId`; no registra query string, cabeceras ni cuerpos. Si falta el `requestId`,
+  incrementa `hello_service_access_log_missing_request_id_total`.
 - La correlación se verificó en una ruta de error (`POST /api/hello` -> `405`) con
   `X-Request-ID: p13-correlation-test`; el mismo valor aparece en la cabecera de respuesta y
-  en el log.
-- El runbook cubre arranque, liveness, contrato, `5xx`, conflicto de puerto, correlación y
-  rollback a `0.0.1-SNAPSHOT`.
+  en el access log.
+- El runbook cubre arranque, liveness, contrato, `5xx`, conflicto de puerto, correlación,
+  inspección de señales y rollback a `0.0.1-SNAPSHOT`.
 - La revisión es una autoevaluación del mantenedor en
-  `blueprint/reviews/observability-closure.md`; no es una aprobación independiente.
+  `blueprint/reviews/observability-improvements.md`; no es una aprobación independiente.
 
 ## Mejora continua
 
@@ -159,15 +178,18 @@ El registro de mejora continua está en
 (`IMP-001` … `IMP-005`) nombra un propietario, el artefacto que cambiaría y la fuente de
 feedback que lo originó.
 
-- `IMP-002` se implementó el 2026-11-02 con un escaneo Trivy sobre `gradle.lockfile`;
-  `IMP-001`, `IMP-003`, `IMP-004` e `IMP-005` siguen `Deferred`.
-- No hay revisión de requisito ni versión nueva; `0.1.0` sigue siendo la versión
-  entregada, ahora también publicada en Quay.
+- `IMP-002` se implementó el 2026-11-02 con un escaneo Trivy sobre `gradle.lockfile`.
+- `IMP-001` (métricas), `IMP-003` (readiness) e `IMP-005` (access log) se implementaron el
+  2026-11-03 bajo `REQ-OBS-001`; `IMP-004` (reglas de alerta) se implementó a nivel de
+  definición bajo `REQ-OBS-002`, sin desplegar el stack de evaluación ni paging.
+- Se añade el requisito `REQ-OBS-001`, pero no una versión nueva; `0.1.0` sigue siendo la
+  versión entregada, ahora también publicada en Quay.
 - El cierre de la fase 14 está en el registro y en
-  `blueprint/reviews/continuous-improvement-closure.md`; es una autoevaluación del
-  mantenedor, no una aprobación independiente.
-- El bucle de `IMP-002` queda cerrado; los bucles de `IMP-001`, `IMP-003`, `IMP-004` e
-  `IMP-005` permanecen abiertos.
+  `blueprint/reviews/continuous-improvement-closure.md`; la implementación post-cierre se
+  revisa en `blueprint/reviews/observability-improvements.md`; ambas son autoevaluaciones del
+  mantenedor, no aprobaciones independientes.
+- Los bucles de `IMP-001`, `IMP-002`, `IMP-003`, `IMP-004` e `IMP-005` quedan cerrados;
+  `IMP-004` se limita a la definición de reglas y documentación de scrape/probes.
 
 ## Limitaciones conocidas
 
@@ -187,12 +209,14 @@ feedback que lo originó.
   `refs/tags/*` está protegido por ruleset y la publicación rechaza reutilizar un tag
   existente en Quay por defecto; el tag remoto `0.1.0` ya existente no se reescribe sin
   `allow_republish=true` (decisión explícita del operador).
-- No hay readiness probe ni despliegue en staging o producción; `/api/status` es una señal
-  de liveness.
-- No hay alertas automatizadas, métricas, trazas ni access log por petición; la detección de
-  la fase 13 es manual y el runbook está en `blueprint/observability/hello-service.md`.
-- `IMP-002` está implementado y su bucle cerrado; `IMP-001` … `IMP-005` menos `IMP-002`
-  siguen diferidos y no se declara ninguna otra mejora entregada.
+- Hay probes de Actuator y `readiness` separada de `/api/status`, pero no hay despliegue en
+  staging o producción; `readiness` está `UP` porque no hay dependencias externas.
+- Hay ocho reglas de alerta versionadas, pero no hay Prometheus, Alertmanager, blackbox
+  exporter, dashboard, backend de métricas, trazas ni retención/envío del access log; la
+  evaluación y el paging siguen siendo manuales y el runbook está en
+  `blueprint/observability/hello-service.md`.
+- `IMP-001`, `IMP-002`, `IMP-003`, `IMP-004` e `IMP-005` están implementados y sus bucles
+  cerrados; `IMP-004` se cierra a nivel de definición, sin stack desplegado.
 - El escaneo de dependencias acepta dos CVEs críticos de `spring-webmvc` en `.trivyignore`
   porque el servicio no usa `XsltView` ni Server-Sent Events y la corrección requiere
   Spring Framework 7.0.9.
@@ -209,9 +233,15 @@ feedback que lo originó.
 - [Despliegue local 0.1.0](blueprint/deployment/local-0.1.0.md)
 - [Cambio de publicación remota](blueprint/changes/p11-remote-publication.md)
 - [Revisión de publicación remota](blueprint/reviews/remote-publication.md)
+- [Requisito de observabilidad](blueprint/requirements/observability-improvements.md)
+- [Arquitectura de observabilidad](blueprint/architecture/observability-improvements.md)
+- [ADR-014](blueprint/architecture/adr/adr-014-observability-stack.md)
 - [Observabilidad local](blueprint/observability/hello-service.md)
-- [Revisión de observabilidad](blueprint/reviews/observability-closure.md)
-- [Cambio de observabilidad](blueprint/changes/p13-observability.md)
+- [Evidencia de pruebas de observabilidad](blueprint/testing/observability-improvements.md)
+- [Revisión de observabilidad](blueprint/reviews/observability-improvements.md)
+- [Revisión de observabilidad original](blueprint/reviews/observability-closure.md)
+- [Cambio de observabilidad](blueprint/changes/observability-improvements.md)
+- [Cambio de observabilidad original](blueprint/changes/p13-observability.md)
 - [Revisión del cierre de entrega](blueprint/reviews/delivery-closure.md)
 - [Gates de cierre](blueprint/gates.md)
 - [Blueprint — Continuous Delivery](blueprint/11-continuous-delivery.md)

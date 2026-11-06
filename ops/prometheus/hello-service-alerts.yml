@@ -1,0 +1,114 @@
+groups:
+  - name: hello-service
+    rules:
+      - alert: HelloServiceDown
+        expr: up{job="hello-service"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: hello-service
+        annotations:
+          summary: hello-service is not responding to Prometheus scrapes
+          description: >-
+            The Prometheus target has been down for 2 minutes. The process may be
+            stopped, crashed or unreachable on the metrics port.
+          runbook_url: https://github.com/JorvaCode/hello-service/blob/main/blueprint/observability/hello-service.md#rb-01
+
+      - alert: HelloServiceHigh5xxRate
+        expr: >-
+          sum(rate(http_server_requests_seconds_count{job="hello-service",status=~"5.."}[5m]))
+          /
+          clamp_min(sum(rate(http_server_requests_seconds_count{job="hello-service"}[5m])), 1)
+          > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          service: hello-service
+        annotations:
+          summary: hello-service 5xx rate is above 5%
+          description: >-
+            The share of 5xx responses has been above 5% for 5 minutes.
+            Current value: {{ $value | humanizePercentage }}.
+          runbook_url: https://github.com/JorvaCode/hello-service/blob/main/blueprint/observability/hello-service.md#rb-05
+
+      - alert: HelloServiceLatencyHigh
+        expr: >-
+          histogram_quantile(
+            0.95,
+            sum(rate(http_server_requests_seconds_bucket{job="hello-service"}[5m])) by (le)
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          service: hello-service
+        annotations:
+          summary: hello-service p95 latency is above 500 ms
+          description: >-
+            The p95 HTTP latency has been above 500 ms for 5 minutes.
+            Current value: {{ $value | humanizeDuration }}.
+          runbook_url: https://github.com/JorvaCode/hello-service/blob/main/blueprint/observability/hello-service.md#rb-03
+
+      - alert: HelloServiceRestarting
+        expr: process_uptime_seconds{job="hello-service"} < 60
+        for: 1m
+        labels:
+          severity: warning
+          service: hello-service
+        annotations:
+          summary: hello-service restarted recently
+          description: >-
+            Process uptime is below 60 seconds. Confirm that the process is not in
+            a restart loop and inspect the startup logs.
+          runbook_url: https://github.com/JorvaCode/hello-service/blob/main/blueprint/observability/hello-service.md#rb-04
+
+      - alert: HelloServiceLivenessProbeFailing
+        expr: probe_success{job="hello-service-liveness"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: hello-service
+        annotations:
+          summary: hello-service liveness probe is failing
+          description: >-
+            The blackbox liveness probe has failed for 2 minutes. Use the
+            container state and logs to decide whether to restart or roll back.
+          runbook_url: https://github.com/JorvaCode/hello-service/blob/main/blueprint/observability/hello-service.md#rb-02
+
+      - alert: HelloServiceReadinessProbeFailing
+        expr: probe_success{job="hello-service-readiness"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: hello-service
+        annotations:
+          summary: hello-service readiness probe is failing
+          description: >-
+            The blackbox readiness probe has failed for 2 minutes. The process is
+            running but is not ready to serve traffic.
+          runbook_url: https://github.com/JorvaCode/hello-service/blob/main/blueprint/observability/hello-service.md#rb-02
+
+      - alert: HelloServiceHelloContractFailing
+        expr: probe_http_status_code{job="hello-service-hello"} != 200
+        for: 2m
+        labels:
+          severity: critical
+          service: hello-service
+        annotations:
+          summary: hello-service /api/hello contract probe is failing
+          description: >-
+            The blackbox probe for GET /api/hello has not returned 200 for
+            2 minutes. Confirm the status code and the response body.
+          runbook_url: https://github.com/JorvaCode/hello-service/blob/main/blueprint/observability/hello-service.md#rb-03
+
+      - alert: HelloServiceCorrelationMissing
+        expr: increase(hello_service_access_log_missing_request_id_total{job="hello-service"}[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          service: hello-service
+        annotations:
+          summary: hello-service access log is missing request correlation
+          description: >-
+            At least one access-log line in the last 5 minutes had no requestId.
+            Inspect RequestIdFilter ordering and the request path.
+          runbook_url: https://github.com/JorvaCode/hello-service/blob/main/blueprint/observability/hello-service.md#rb-07

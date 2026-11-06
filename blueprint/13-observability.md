@@ -33,13 +33,21 @@ Every failure mode named in the design has an alert mapped to it, and every aler
 ## Project record — local 0.1.0
 
 The local PoC observability record is `blueprint/observability/hello-service.md`. It records
-the operating context, the existing structured logs and `requestId` correlation, the
-`/api/status` liveness check, seven failure modes with manual detection checks, and a
-runbook with eight procedures.
+the operating context, structured logs with `requestId` correlation, the `/api/status`
+liveness check, Actuator liveness/readiness probes, Prometheus metrics, the per-request access
+log, eight Prometheus alert rules, seven failure modes with detection checks, and a runbook with
+nine procedures.
 
-The phase 13 gate is **CLOSED for the local scope with a limitation**: every failure mode has
-a detection check, a response and a runbook step, but detection is manual. No automated
-alerting, metrics, traces or readiness probe exists. The review is a solo-maintainer
-self-review in `blueprint/reviews/observability-closure.md`; it does not claim an independent
-approval. The change is recorded in `blueprint/changes/p13-observability.md` and the gate in
-`blueprint/gates.md` (P-13).
+The phase 13 gate is **CLOSED for the local scope with a limitation**: every failure mode has a
+detection check, a defined alert rule, a response and a runbook step; the service now exposes
+automated probes, metrics, access logs and versioned alert definitions, but no Prometheus,
+Alertmanager, dashboard, metrics backend or paging path is deployed, so no rule is evaluated or
+routed. The original phase 13 record was manual-only; the post-closure implementation closes
+`IMP-001` (metrics), `IMP-003` (readiness), `IMP-004` (alert definitions) and `IMP-005` (access
+log) under `REQ-OBS-001`/`REQ-OBS-002`.
+
+The implementation is recorded in `blueprint/changes/observability-improvements.md`; the
+original phase 13 record is `blueprint/changes/p13-observability.md`. The current review is
+`blueprint/reviews/observability-improvements.md`; the original self-review is
+`blueprint/reviews/observability-closure.md`. Neither claims an independent approval. The gate
+is tracked in `blueprint/gates.md` (P-13).

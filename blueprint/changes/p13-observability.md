@@ -88,3 +88,16 @@ Remote publications to Quay were completed after this phase by `cd.yml` runs 413
 and 41334455398; see `blueprint/changes/p11-remote-publication.md`. The observability scope
 remains local and manual: no automated alerting, metrics or traces were added by the remote
 publications.
+
+## Post-closure update (2026-11-06)
+
+`CHG-OBS-002` (`blueprint/changes/observability-improvements.md`) implements `IMP-001`
+(metrics), `IMP-003` (readiness), `IMP-004` (alert definitions) and `IMP-005` (access logging)
+under `REQ-OBS-001`/`REQ-OBS-002` and ADR-014. It adds Actuator liveness/readiness probes,
+Micrometer Prometheus metrics, a correlated access log with a missing-`requestId` counter and
+eight Prometheus alert rules under `ops/prometheus/`. It does not add a deployed Prometheus,
+Alertmanager, blackbox exporter, metrics backend, dashboard or paging path, so the rules are
+configuration evidence only. This addendum does not rewrite `CHG-OBS-001`; it records that the
+current system supersedes the original "no metrics/readiness/access log" statements. Test
+evidence is the 28-test suite at `3753313` in `blueprint/testing/observability-improvements.md`;
+PR CI evidence is pending until the change is merged.

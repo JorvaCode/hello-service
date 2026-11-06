@@ -26,7 +26,7 @@ improvement candidates below.
 | Gates P-02, P-06, P-07, P-10, P-11, P-13 and P-14 | Do not close a gate without its evidence; record independence limitations | P-02, P-06, P-07, P-10, P-11, P-13 and P-14 closed; P-02, P-07, P-11, P-13 and P-14 closed with solo-maintainer self-review and no independent approval |
 | Real CI execution | Record the successful GitHub Actions runs | Completed — run 10 on `6ccd170`, run 13 on `2e54476`, run 41220748392 on `0fbaffc`, run 41225786925 on `195d40c`, runs 41332436321/41332436297 on `c7d3a86`, runs 41334455181/41334455398 on `21772cc` and run 41610069726 on `8ea03d9` concluded `success` |
 | IMP-002 dependency vulnerability scan | Add a pinned Trivy scan over a committed Gradle lockfile; fail on HIGH/CRITICAL and record accepted findings | Implemented 2026-11-02 — `gradle.lockfile`, Trivy `0.76.1` in `ci.yml`, `.trivyignore`; record in `blueprint/changes/p10-dependency-scan.md` |
-| IMP-001, IMP-003 … IMP-005 | Keep as `Deferred` | No implementation; each item now names an owner, an artifact and its feedback source |
+| IMP-001, IMP-003 … IMP-005 | Reassess after closure; implement only through the normal lifecycle | Post-closure 2026-11-03/05: `IMP-001`, `IMP-003`, `IMP-004` and `IMP-005` implemented under `REQ-OBS-001`/`REQ-OBS-002` in `blueprint/changes/observability-improvements.md`; `IMP-004` is closed at the alert-definition level, not as a deployed monitoring stack |
 
 The remote publications of `0.1.0` were completed on 2026-11-01 by `cd.yml` runs
 41332436297 on `c7d3a86` and 41334455398 on `21772cc`; the current image and digest are
@@ -45,13 +45,13 @@ identifiers P-02, P-06, P-07, P-10, P-11, P-13 and P-14 are defined in
 | Source | Current Evidence | Action |
 |---|---|---|
 | Incidents | No incidents observed | Continue monitoring; no improvement item raised |
-| Metrics | Phase 13 record: no metrics endpoint | Keep `IMP-001` deferred |
+| Metrics | Post-closure record: `/actuator/prometheus` exposes Micrometer/JVM metrics and the `application="hello-service"` tag; no metrics backend or scraper exists; `ops/prometheus/hello-service-alerts.yml` defines eight alert rules | `IMP-001` and `IMP-004` implemented at the definition level; no backend, evaluation or paging |
 | User feedback | No external user feedback available | Capture feedback when the service is consumed by users |
 | Retrospectives | Blueprint phases reviewed during implementation | Keep phase-by-phase review practice |
-| Technical debt | Phase 13 record: no access log and no automated alerting | Keep `IMP-004` and `IMP-005` deferred |
+| Technical debt | Post-closure record: the access log and alert-rule definitions are implemented; a running alerting path, dashboards and log retention are still absent | `IMP-005` and `IMP-004` implemented at the definition level; deployment remains absent |
 | Security findings | CI runs gitleaks and a Trivy dependency scan over `gradle.lockfile`; two accepted `spring-webmvc` criticals are recorded in `.trivyignore` | Keep `IMP-002` implemented; review accepted findings when Spring Framework 7 is adopted |
 | Performance findings | No performance issue identified | Reassess if traffic or processing complexity increases |
-| Operational feedback | Phase 13 record: no readiness probe | Keep `IMP-003` deferred |
+| Operational feedback | Post-closure record: `/actuator/health/readiness` and liveness probes are implemented and tested; no external dependency is checked yet | `IMP-003` implemented; extend the readiness indicator when a dependency is added |
 
 ## Learnings
 
@@ -78,6 +78,8 @@ identifiers P-02, P-06, P-07, P-10, P-11, P-13 and P-14 are defined in
     a postponed intention from the workflow's actual trigger.
 11. A manual workflow disable did not prevent a push-triggered run in this repository;
     removing the trigger from the workflow definition is the reliable control.
+12. An alert rule is a definition, not an operating capability: closure records must
+    distinguish a reviewed rule file from a deployed evaluation, routing and paging path.
 
 ## Improvement Candidates
 
@@ -99,7 +101,12 @@ demonstration scope.
 **Potential impact:**
 Requirements, observability design and deployment configuration.
 
-**Status:** Deferred — no implementation; loop open.
+**Status:** Implemented 2026-11-03 — `REQ-OBS-001`, ADR-014 and `CHG-OBS-002` add
+Actuator/Micrometer Prometheus metrics at `/actuator/prometheus`. Evidence:
+`blueprint/testing/observability-improvements.md` (28 tests at `3753313`) and
+`blueprint/changes/observability-improvements.md`. No metrics backend is delivered; the eight
+alert-rule definitions are recorded under `IMP-004`, but no evaluation or paging path exists.
+Loop closed by implementation.
 
 ---
 
@@ -141,7 +148,12 @@ requiring orchestration-level health probes.
 **Potential impact:**
 Requirements, architecture, deployment and observability.
 
-**Status:** Deferred — no implementation; loop open.
+**Status:** Implemented 2026-11-03 — `REQ-OBS-001`, ADR-014 and `CHG-OBS-002` enable the
+Actuator liveness and readiness groups at `/actuator/health/liveness` and
+`/actuator/health/readiness`. The readiness group is `UP` when the context is ready and does
+not check an external dependency because none exists. Evidence:
+`blueprint/testing/observability-improvements.md` (28 tests at `3753313`). Loop closed by
+implementation.
 
 ---
 
@@ -153,8 +165,9 @@ detection limitation.
 
 **Owner:** Jorva (maintainer).
 
-**Artifact changed:** `blueprint/observability/hello-service.md`, the deployment/operating
-model and CI/CD configuration.
+**Artifact changed:** `ops/prometheus/hello-service-alerts.yml`,
+`ops/prometheus/README.md`, `blueprint/requirements/observability-alerting.md`,
+`blueprint/observability/hello-service.md` and `blueprint/testing/observability-improvements.md`.
 
 **Description:**
 Evaluate an automated alerting path for the failure modes recorded in
@@ -164,7 +177,14 @@ PoC. The current detection is manual; there is no paging path or dashboard.
 **Potential impact:**
 Observability, deployment and operating model.
 
-**Status:** Deferred — no implementation; loop open.
+**Status:** Implemented 2026-11-06 at the definition level — `REQ-OBS-002` and
+`CHG-OBS-002` add eight Prometheus rules mapped to `FM-01`...`FM-07` plus the `HELLO-001`
+contract, each with a severity and runbook URL, and a README for the required
+application/blackbox jobs. Evidence:
+`blueprint/testing/observability-improvements.md` (`AlertRulesTest`, 28 tests at `3753313`).
+No Prometheus, Alertmanager, blackbox exporter or paging path is deployed; evaluation,
+routing and tuning remain outside the local PoC. Loop closed for the definition gap, with the
+live-alerting limitation recorded.
 
 ---
 
@@ -188,29 +208,46 @@ framework error logs. The current correlation is demonstrated on error paths onl
 **Potential impact:**
 Implementation, tests and log-injection review.
 
-**Status:** Deferred — no implementation; loop open.
+**Status:** Implemented 2026-11-06 — `RequestAccessLogFilter` emits one correlated
+`access method=… path=… status=… duration_ms=… requestId=…` line per request, with query
+strings and bodies omitted, and a missing `requestId` increments
+`hello_service_access_log_missing_request_id_total`. Evidence: `RequestAccessLogFilterTest`
+(5 tests) at `3753313`,
+recorded in `blueprint/testing/observability-improvements.md` and
+`blueprint/changes/observability-improvements.md`. Log shipping, sampling and retention remain
+unimplemented and are recorded as limitations, not as a separate open item. Loop closed by
+implementation.
 
 ## Lifecycle Changes
 
-No normative phase document, standard, template or ADR is changed by this phase. At phase 14
+No normative phase document, standard or template is changed by this phase. At phase 14
 closure, the five improvement items were deferred and none revised a requirement; `IMP-002`
-was implemented later under phase 10. The project-specific phase
-records (`blueprint/14-continuous-improvement.md`, `blueprint/gates.md` and `README.md`) are
-updated to record this phase; that is not a change to the lifecycle's normative text. If an
-item is implemented, it enters the lifecycle at the phase named in its "Artifact changed"
-field and follows the normal requirement, design, test, review, delivery and deployment
-path. The post-closure remote publication enters the lifecycle at phase 11 and is recorded
-in `blueprint/changes/p11-remote-publication.md`; it is not a phase 14 improvement delivery.
+was implemented later under phase 10. Post-closure on 2026-11-03/05, `IMP-001`, `IMP-003`,
+`IMP-004` and `IMP-005` were implemented under phase 13 through `REQ-OBS-001`/`REQ-OBS-002`,
+ADR-014 and `CHG-OBS-002`; `IMP-004` is closed at the alert-definition level, not as a deployed
+monitoring stack. The project-specific phase records
+(`blueprint/14-continuous-improvement.md`, `blueprint/gates.md` and `README.md`) are updated to
+record this phase; that is not a change to the lifecycle's normative text. If an item is
+implemented, it enters the lifecycle at the phase named in its "Artifact changed" field and
+follows the normal requirement, design, test, review, delivery and deployment path. The
+post-closure remote publication enters the lifecycle at phase 11 and is recorded in
+`blueprint/changes/p11-remote-publication.md`; it is not a phase 14 improvement delivery.
 
 ## Phase 14 Closure Record
 
 | Item | Change made | Evidence of effect | Requirement revision | Release |
 | --- | --- | --- | --- | --- |
 | Phase 14 register | Added an owner, named artifact, feedback evidence and closure state to `IMP-001` … `IMP-005`; added this lifecycle record and closure | `blueprint/reviews/continuous-improvement-closure.md`; local test run 2026-10-30T18:45:20Z (17 tests, 0 failures); phase 14 CI run 41225786925 (`success`); phase 13 CI run 41220748392 (`success`) | None | None; `0.1.0` local release unchanged |
-| `IMP-001` … `IMP-005` | No implementation; all remain `Deferred` | No implementation evidence exists; each item's loop remains open | None | None |
+| `IMP-001` … `IMP-005` | At phase 14 closure: no implementation; all remained `Deferred` | No implementation evidence existed at closure; each item's loop remained open | None | None |
+| Post-closure `IMP-001`, `IMP-003`, `IMP-004`, `IMP-005` | Implemented metrics, readiness/liveness probes, access logging and alert-rule definitions | `REQ-OBS-001`/`REQ-OBS-002`; `CHG-OBS-002`; 28 tests at `3753313`; recorded in `blueprint/testing/observability-improvements.md` | Added `REQ-OBS-001` (`FR-01`…`FR-08`, `NFR-01`…`NFR-07`) and `REQ-OBS-002` | Existing `0.1.0` artifact line; no new release or tag |
+| `IMP-004` | Implemented at the definition level: eight Prometheus alert rules and their scrape/probe documentation | `ops/prometheus/hello-service-alerts.yml`, `ops/prometheus/README.md`, `AlertRulesTest`; no Prometheus/Alertmanager/paging deployment | Added `REQ-OBS-002` | None; configuration evidence only |
 
-The closure record closes the phase 14 register change. It does not claim that any deferred
-improvement was delivered. The loops for `IMP-001` … `IMP-005` remain open by design.
+The closure record closes the phase 14 register change as it stood on 2026-10-30. It did not
+claim that any deferred improvement had been delivered at that time. The loops for
+`IMP-001` … `IMP-005` were open at closure; the post-closure rows above now close
+`IMP-001`, `IMP-003`, `IMP-004` and `IMP-005`. The `IMP-004` closure is scoped to the
+alert-definition gap; the absence of a deployed evaluation, routing and paging path remains a
+recorded limitation.
 
 Post-closure events (2026-11-01): merging PR #5 triggered `cd.yml` on `c7d3a86`; run
 41332436297 published `0.1.0` to Quay and deployed it by digest. Merging PR #6 on
@@ -227,20 +264,33 @@ scan evidence is attached to CI run 41610069726 on `8ea03d9`. This closes the
 are unchanged; the implementation is recorded against phase 10, the artifact named by
 `IMP-002`.
 
+Post-closure implementation (2026-11-03/05): `IMP-001`, `IMP-003`, `IMP-004` and `IMP-005` were
+implemented under phase 13 by `REQ-OBS-001`/`REQ-OBS-002`, ADR-014 and `CHG-OBS-002`. The
+change adds Actuator liveness/readiness probes, Micrometer Prometheus metrics, a correlated
+access log and eight Prometheus alert-rule definitions. It does not add a metrics backend,
+dashboard, deployed rule evaluation or paging path; that limitation is recorded. Evidence is
+the 28-test suite at `3753313`, recorded in
+`blueprint/testing/observability-improvements.md`, and the review in
+`blueprint/reviews/observability-improvements.md`. No new release or tag was created; the
+change ships in the existing `0.1.0` artifact line.
+
 ## Phase 14 Gate
 
-**State: CLOSED (register updated; all improvement items deferred; no requirement revision).**
+**State: CLOSED (register updated; `IMP-001`/`003`/`004`/`005` implemented post-closure;
+`IMP-004` at the definition level).**
 
 - Every improvement item names an owner and the artifact it changes.
 - Every item traces back to a named feedback source and its evidence.
 - The closure record states what changed and the evidence that it took effect.
-- No item revises a requirement, so no `FR-nn`/`NFR-nn` or release is named.
-- Limitation: the loops for `IMP-001` … `IMP-005` remain open; no improvement was
-  implemented in this phase.
+- `REQ-OBS-001` (`FR-01`…`FR-08`, `NFR-01`…`NFR-07`) and `REQ-OBS-002` record the
+  post-closure signals and alert definitions; no new release or tag was created.
+- Limitation: the eight alert rules are configuration evidence only; no Prometheus,
+  Alertmanager, blackbox exporter, dashboard, metrics backend or paging path is deployed.
 - Post-closure remote publication: recorded separately in
   `blueprint/changes/p11-remote-publication.md`; it does not close any improvement loop.
-- Review: `blueprint/reviews/continuous-improvement-closure.md`; solo-maintainer
-  self-review, not independent approval.
+- Review: `blueprint/reviews/continuous-improvement-closure.md` (original register) and
+  `blueprint/reviews/observability-improvements.md` (post-closure implementation);
+  solo-maintainer self-reviews, not independent approval.
 
 ## Feedback Loop
 
