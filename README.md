@@ -2,25 +2,34 @@
 
 PoC mínimo de servicio HTTP usado para recorrer las fases del Software Engineering
 Blueprint. No es un servicio de producción; la versión `0.1.0` tiene un registro de
-release local y dos publicaciones remotas en Quay registradas el 2026-11-01.
+release local, dos publicaciones remotas en Quay registradas el 2026-11-01 y, el
+2026-11-06, un despliegue en el entorno `staging` de GitHub y un rollback remoto por
+digest.
 
 ## Alcance de cierre
 
 El cierre aprobado cubre la PoC de `hello-service` con configuración de CI, despliegue
-local y publicaciones remotas mediante `cd.yml`.
+local, publicaciones remotas y despliegue/rollback remoto en `staging` mediante `cd.yml`.
 
 - Las publicaciones remotas en Quay se realizaron el 2026-11-01 con `cd.yml` (runs
   41332436297 y 41334455398); el digest actual es
   `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17`.
+- El 2026-11-06 se desplegó ese digest en el entorno `staging` (run 42241159036) y se
+  ejecutó un rollback remoto por digest a `0.0.1-SNAPSHOT` (run 42241543717); `staging`
+  queda en ese digest. El intento con el digest `4d06e51` falló con `manifest unknown`
+  (run 42241318818) y queda registrado como F-01.
 - El workflow `cd.yml` se ejecutó al fusionar los PR #5 y #6; ahora solo admite
-  `workflow_dispatch` para evitar publicaciones automáticas.
+  `workflow_dispatch` para evitar publicaciones automáticas. Desde el PR #13 acepta
+  `target_environment` y `image_digest` para promover o revertir sin reconstruir.
 - La revisión independiente de `REQ-STATUS-001` no se realizó; el cierre de P-07 registra
   una autoevaluación del mantenedor y no una aprobación independiente.
 - No se crea `CHANGELOG.md`.
 - El Blueprint no se declara formalmente validado.
-- Los gates se cierran solo con su evidencia: P-02, P-06, P-07, P-10, P-11, P-13 y P-14
-  están cerrados; P-02, P-07, P-11, P-13 y P-14 registran autoevaluación del mantenedor
-  porque no hay revisor independiente (ver `blueprint/gates.md`).
+- Los gates se cierran solo con su evidencia: P-02, P-06, P-07, P-10, P-11, P-12, P-13 y
+  P-14 están cerrados; P-02, P-07, P-11, P-12, P-13 y P-14 registran autoevaluación del
+  mantenedor porque no hay revisor independiente (ver `blueprint/gates.md`).
+- El despliegue remoto se ejecuta en el runner de GitHub Actions, no en un host externo;
+  no se reclama un despliegue de producción ni una aprobación independiente.
 
 ## Qué es y relación con el Blueprint
 
@@ -113,7 +122,7 @@ Los endpoints de Actuator no están autenticados en el límite local; `health` o
 `REQ-STATUS-001` la realizó el asistente OpenCode, no un revisor humano independiente;
 esa aprobación sigue pendiente y no debe presentarse como obtenida.
 
-## Estado de CI, despliegue local y publicación remota
+## Estado de CI, despliegue local, publicación remota y rollback
 
 | Área | Evidencia de configuración | Evidencia de ejecución real | Estado |
 |---|---|---|---|
@@ -121,10 +130,10 @@ esa aprobación sigue pendiente y no debe presentarse como obtenida.
 | Packaging | Versión `0.1.0`, JAR ejecutable, imagen OCI con labels de procedencia, identidad, escaneo gitleaks y escaneo Trivy de dependencias con lockfile | Run 13: `artifact-metadata`, `hello-service-0.1.0` y `gitleaks-report`; run 41610069726 añade `trivy-report` | P-10 `CLOSED`; escaneo de dependencias `VERIFICADO` |
 | Pruebas locales | Gradle Wrapper y suite automatizada | 17 tests históricos sobre `f2b03e5`, `72c2ad5` y `870500c`; 28 tests sobre `3753313` el 2026-11-06 | Suite actual verde; run 42239560605 sobre `fc69901`, `success` |
 | Despliegue local | `Dockerfile` OCI, usuario no-root, puerto `8080` y entrypoint del JAR | Procedimiento reproducible verificado el 2026-10-30: build local, imagen `0.1.0`, contenedor como `appuser`, probes en `127.0.0.1:18080` y rollback a `0.0.1-SNAPSHOT` | Procedimiento verificado; registro en `blueprint/deployment/local-0.1.0.md` |
-| Release local / P-11 | Versión `0.1.0`, imagen local y rollback a `0.0.1-SNAPSHOT` | Promoción local registrada el 2026-10-30; rollback ejercitado | P-11 `CLOSED` con autoevaluación; publicaciones remotas registradas; sin aprobación independiente |
+| Release local, staging y rollback / P-11 y P-12 | Versión `0.1.0`, imagen local, rollback a `0.0.1-SNAPSHOT`; `cd.yml` con `target_environment` e `image_digest` | Promoción local registrada el 2026-10-30; rollback local ejercitado; despliegue en `staging` (run 42241159036) y rollback remoto por digest (run 42241543717) el 2026-11-06; intento fallido con `4d06e51` (run 42241318818) | P-11/P-12 `CLOSED` con autoevaluación; `staging` queda en `0.0.1-SNAPSHOT`; sin aprobación independiente |
 | Observabilidad / P-13 | Logs estructurados con `requestId`, `/api/status` liveness, Actuator liveness/readiness, métricas Prometheus, access log correlacionado y ocho reglas de alerta Prometheus; sin Prometheus/Alertmanager desplegados, dashboard ni evaluación | Registro en `blueprint/observability/hello-service.md`; 28 tests en `blueprint/testing/observability-improvements.md`; reglas en `ops/prometheus/hello-service-alerts.yml`; correlación y runbook verificados el 2026-10-30 | P-13 `CLOSED` con señales automatizadas y alertas definidas; evaluación y paging manuales; sin aprobación independiente |
 | Mejora continua / P-14 | Registro de mejoras con propietario, artefacto y fuente de feedback; `IMP-001`, `IMP-003`, `IMP-004` e `IMP-005` implementados post-cierre; `IMP-004` a nivel de definición | Registro y cierre en `blueprint/improvements/continuous-improvements.md`; revisiones `continuous-improvement-closure.md` y `observability-improvements.md` | P-14 `CLOSED` para el registro; todos los bucles cerrados, `IMP-004` sin stack desplegado; sin aprobación independiente |
-| CD / Quay | `.github/workflows/cd.yml` contiene pasos de OIDC, login y push a Quay; el único disparador es `workflow_dispatch` | Runs 41332436297 sobre `c7d3a86` y 41334455398 sobre `21772cc`: `success`; imagen `quay.io/odysseia/hello-service:0.1.0`, digest actual `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17`, deploy por digest y smoke test `GET /api/hello` -> `200` | Publicación remota completada; publicación automática deshabilitada; promoción a segundo entorno no ejecutada; sin rollback remoto |
+| CD / Quay | `.github/workflows/cd.yml` contiene pasos de OIDC, login y push a Quay; el único disparador es `workflow_dispatch`; acepta `target_environment` e `image_digest` | Runs 41332436297 sobre `c7d3a86` y 41334455398 sobre `21772cc`: `success`; imagen `quay.io/odysseia/hello-service:0.1.0`, digest actual `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17`, deploy por digest y smoke test `GET /api/hello` -> `200`; runs 42241159036 y 42241543717: `success` (staging y rollback) | Publicación remota completada; publicación automática deshabilitada; promoción a `staging` y rollback remoto ejecutados; el despliegue corre en el runner de Actions |
 
 ## Publicación remota
 
@@ -139,14 +148,30 @@ ejecución. El workflow usó autenticación OIDC y publicó en el namespace `ody
 - Deploy por digest y smoke test `GET /api/hello` -> `200`, `text/plain;charset=UTF-8`,
   `Hello, World!`.
 - CI runs 41332436321 y 41334455181; CD runs 41332436297 y 41334455398, ambos `success`.
-- Promoción a un segundo entorno: mecanismo preparado, no ejecutado.
-- Rollback remoto: no ejercitado; no hay release remoto anterior registrado.
 - El registro local de `0.1.0` sigue en `blueprint/delivery/release-0.1.0.md`; los eventos
   remotos se registran en `blueprint/changes/p11-remote-publication.md`.
 - `cd.yml` ahora solo admite `workflow_dispatch`; un push a `main` no publica.
-- Se añaden controles de publicación: entorno `production` protegido por rama `main`, guardia de inmutabilidad por tag en Quay (se rechaza reutilizar un tag existente salvo `allow_republish=true`) y un ruleset de GitHub que protege `refs/tags/*`.
+- Se añaden controles de publicación: entornos `staging` y `production` protegidos por rama `main`, guardia de inmutabilidad por tag en Quay (se rechaza reutilizar un tag existente salvo `allow_republish=true`) y un ruleset de GitHub que protege `refs/tags/*`.
 
 El tag `0.1.0` queda protegido contra movimientos/borrados por ruleset; si ya existe en Quay, `cd.yml` lo rechaza por defecto. El digest es la identidad inmutable del artefacto.
+
+## Despliegue en staging y rollback remoto
+
+El 2026-11-06, desde `main` en `6d5fa89`, `cd.yml` desplegó el digest actual de `0.1.0`
+en el entorno `staging` sin reconstruir ni publicar (run 42241159036, `success`; smoke
+`GET /api/hello` -> `200`, `text/plain;charset=UTF-8`, `Hello, World!`). Después se
+ejercitó un rollback remoto por digest al artefacto `0.0.1-SNAPSHOT`
+(`sha256:81ca2f236241fe443f4d1633b254dcc2b90e32fd3bc07b35e5969be3e7e9b833`) con el run
+42241543717, también `success` y con el mismo smoke test. `staging` queda en ese digest.
+
+El primer intento de rollback usó el digest `4d06e51` del `0.1.0` superado; Quay lo listaba
+en la API de tags pero la extracción falló con `manifest unknown` (run 42241318818). El
+fallo queda como F-01 y el procedimiento exige verificar que el digest sea extraíble antes
+de elegirlo. El despliegue se ejecuta en el runner de GitHub Actions, no en un host externo;
+no se reclama producción ni aprobación independiente. Registros:
+`blueprint/deployment/remote-staging-0.1.0.md`,
+`blueprint/testing/staging-rollback.md`, `blueprint/changes/p11-staging-rollback.md` y
+`blueprint/reviews/staging-rollback.md`.
 
 ## Observabilidad
 
@@ -198,19 +223,21 @@ feedback que lo originó.
 - El Blueprint permanece `NO VERIFICADO` en cuanto a validación formal.
 - No se crea `CHANGELOG.md`; el registro de release es
   `blueprint/delivery/release-0.1.0.md`.
-- P-02, P-06, P-07, P-10, P-11, P-13 y P-14 están cerrados; P-02, P-07, P-11, P-13 y
-  P-14 registran autoevaluación del mantenedor y no una aprobación independiente
+- P-02, P-06, P-07, P-10, P-11, P-12, P-13 y P-14 están cerrados; P-02, P-07, P-11, P-12,
+  P-13 y P-14 registran autoevaluación del mantenedor y no una aprobación independiente
   (definidos en `blueprint/gates.md`).
 - `cd.yml` se ejecutó al fusionar los PR #5 y #6 y publicó `0.1.0` dos veces; el trigger
   automático se eliminó y ahora solo admite `workflow_dispatch`.
 - La publicación remota tiene evidencia de ejecución y digest registrado. La promoción
   local de `0.1.0` sigue registrada y su rollback fue ejercitado.
-- No se ejecutó promoción remota a un segundo entorno ni rollback remoto. El tag Git
-  `refs/tags/*` está protegido por ruleset y la publicación rechaza reutilizar un tag
-  existente en Quay por defecto; el tag remoto `0.1.0` ya existente no se reescribe sin
-  `allow_republish=true` (decisión explícita del operador).
-- Hay probes de Actuator y `readiness` separada de `/api/status`, pero no hay despliegue en
-  staging o producción; `readiness` está `UP` porque no hay dependencias externas.
+- El 2026-11-06 se ejecutó una promoción remota al entorno `staging` de GitHub y un rollback
+  remoto por digest; el contenedor corre en el runner de Actions, no en un host staging
+  externo. El tag Git `refs/tags/*` está protegido por ruleset y la publicación rechaza
+  reutilizar un tag existente en Quay por defecto; el tag remoto `0.1.0` ya existente no se
+  reescribe sin `allow_republish=true` (decisión explícita del operador).
+- No hay despliegue en un host de producción; `staging` es un entorno de GitHub sobre el
+  runner. Hay probes de Actuator y `readiness` separada de `/api/status`; `readiness` está
+  `UP` porque no hay dependencias externas.
 - Hay ocho reglas de alerta versionadas, pero no hay Prometheus, Alertmanager, blackbox
   exporter, dashboard, backend de métricas, trazas ni retención/envío del access log; la
   evaluación y el paging siguen siendo manuales y el runbook está en
@@ -233,6 +260,10 @@ feedback que lo originó.
 - [Despliegue local 0.1.0](blueprint/deployment/local-0.1.0.md)
 - [Cambio de publicación remota](blueprint/changes/p11-remote-publication.md)
 - [Revisión de publicación remota](blueprint/reviews/remote-publication.md)
+- [Despliegue y rollback en staging](blueprint/deployment/remote-staging-0.1.0.md)
+- [Evidencia de pruebas de staging/rollback](blueprint/testing/staging-rollback.md)
+- [Cambio de staging/rollback](blueprint/changes/p11-staging-rollback.md)
+- [Revisión de staging/rollback](blueprint/reviews/staging-rollback.md)
 - [Requisito de observabilidad](blueprint/requirements/observability-improvements.md)
 - [Arquitectura de observabilidad](blueprint/architecture/observability-improvements.md)
 - [ADR-014](blueprint/architecture/adr/adr-014-observability-stack.md)

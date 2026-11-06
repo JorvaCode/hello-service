@@ -242,3 +242,13 @@ closes with that limitation recorded.
 | Tests | `.\gradlew.bat test --offline --no-daemon --console=plain` | `BUILD SUCCESSFUL`; no application code changed by this record |
 | Diff hygiene | `git diff --check` | Clean |
 | Token pattern scan | `rg -l` for GitHub token patterns in the working tree | No files matched |
+
+## Post-closure update
+
+This analysis records the state before `CHG-DEL-005`. Its assumption A-04, risk R-06 and
+the future-improvement list are superseded for the staging scope: on 2026-11-06 the GitHub
+`staging` environment accepted a digest deployment (run 42241159036) and a remote rollback
+by digest (run 42241543717), both successful. The deployment still runs on the Actions
+runner, so the external-host limitation remains. See
+`blueprint/changes/p11-staging-rollback.md` and
+`blueprint/deployment/remote-staging-0.1.0.md`.
