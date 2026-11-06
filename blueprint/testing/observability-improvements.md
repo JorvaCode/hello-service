@@ -121,13 +121,19 @@ No open defect remains for the tested behaviour.
 - F-01 is fixed and covered by `ActuatorEndpointTest.prometheusEndpointExposesJvmMetrics`.
 - Checked against `blueprint/06-testing.md`: the suite, run result (environment, commit,
   command), criterion coverage, scenario coverage and defect record are present.
-- Phase 06 is **CLOSED for the local scope**. PR CI is recorded below when it completes.
+- Phase 06 is **CLOSED for the local scope**. PR CI is recorded below.
 
 ## PR CI record
 
-The branch is `feat/observability-improvements`. The PR opens against `main`; the CI run is
-recorded after the push. The workflow runs the same `clean test` plus the existing secret and
-Trivy dependency scans. This section is updated with the run id and conclusion after CI.
+- PR: https://github.com/JorvaCode/hello-service/pull/12 (`feat/observability-improvements` into `main`).
+- First run `42238330408` at `b62b93f`: build/test passed; the Trivy dependency scan failed on
+  `CVE-2026-40983` and `CVE-2026-40984` in Micrometer `1.15.11`.
+- Fix `3753313` pins `micrometer.version=1.15.12` and regenerates `gradle.lockfile`.
+- Successful run `42239560605` at `fc69901` (docs-only commit after `3753313`): **success**.
+  The single `Build and test` job passed the suite, secret scan, dependency vulnerability scan
+  and image identity steps. URL: https://github.com/JorvaCode/hello-service/actions/runs/42239560605.
+- The workflow runs the same `clean test` plus the existing secret and Trivy dependency scans;
+  no unaccepted HIGH/CRITICAL finding was reported in the successful run.
 
 ## Traceability
 

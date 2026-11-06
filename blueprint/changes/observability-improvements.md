@@ -81,7 +81,9 @@ and affects consumers, so it meets `standards/terms.md` criteria (c), (d) and (e
   {"status":"UP"}`, `/actuator/prometheus` returned `200` with JVM metrics, the
   `application="hello-service"` tag and the missing-correlation counter, and `/api/hello` with
   `X-Request-ID: d-jar-evidence` produced a correlated access-log line.
-- PR CI runs the same suite plus the existing secret and Trivy dependency scans.
+- PR CI run `42239560605` at `fc69901` passed the same suite plus the secret scan, Trivy
+  dependency scan and image identity steps; run `42238330408` had failed on Micrometer CVEs,
+  fixed by `3753313` (`micrometer.version=1.15.12`).
 
 | Criterion | Level | Check that verifies it |
 | --- | --- | --- |
@@ -140,5 +142,5 @@ None. No test or artifact is removed.
   operated. `IMP-004` is closed at the definition level, not at the live-alerting level.
 - The local test evidence is commit-bound to `3753313`; this change record and the other
   Blueprint documents are documentation-only follow-up commits.
-- PR CI evidence is appended to `blueprint/testing/observability-improvements.md` after the
-  PR run.
+- PR CI run `42239560605` at `fc69901` is recorded in
+  `blueprint/testing/observability-improvements.md` and `blueprint/reviews/observability-improvements.md`.

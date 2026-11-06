@@ -19,7 +19,8 @@
   `blueprint/gates.md`, `README.md`, `blueprint/changes/observability-improvements.md`.
 - Checklist: `blueprint/07-code-review.md`.
 - Evidence: local test run at `37533139e1c950d49050eb584c2d9e0e3de4e932` on 2026-11-06
-  (`BUILD SUCCESSFUL`; 28 tests, 0 failures, 0 errors, 0 skipped); PR CI to be recorded.
+  (`BUILD SUCCESSFUL`; 28 tests, 0 failures, 0 errors, 0 skipped). PR CI run `42239560605`
+  at `fc69901` passed build/test, secret scan, Trivy dependency scan and image identity.
 
 This is a self-review by the agent that produced the change. It is not an independent review.
 
@@ -107,7 +108,8 @@ No requirement is changed by this review.
 - No load/performance or live alert-evaluation test is added because there is no throughput
   requirement and no Prometheus/Alertmanager instance; this is a stated limitation, not a
   silent gap.
-- PR CI is not yet recorded at the time of this review; the local run is the review evidence.
+- PR CI run `42239560605` at `fc69901` passed, including the secret and Trivy scans; the local
+  run remains the commit-bound test evidence.
 
 ### 8. Security concerns addressed?
 
@@ -152,7 +154,7 @@ No requirement is changed by this review.
 | F-5 | Info | The access log increases stdout volume and logs path segments. | Accepted for the local PoC; query strings/payloads are excluded and no sensitive path exists. |
 | F-6 | Info | No load/performance test was run. | Accepted; no throughput requirement exists. Reassess if traffic or processing complexity increases. |
 | F-7 | High, fixed | `/actuator/prometheus` initially returned `404` because Prometheus export was not enabled. | Fixed with `management.prometheus.metrics.export.enabled=true`; covered by `prometheusEndpointExposesJvmMetrics`. |
-| F-8 | Info | PR CI had not run when the local review was recorded. | Local test evidence is recorded; CI is recorded in the PR/test artifact after the push. |
+| F-8 | Info, resolved | PR CI had not run when the local review was recorded. | Resolved: run `42239560605` at `fc69901` passed build/test, secret scan, Trivy scan and image identity. |
 
 ## Verdict
 
