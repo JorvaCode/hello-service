@@ -91,7 +91,7 @@ Resultado actual en `blueprint/testing/observability-improvements.md`:
 
 - `BUILD SUCCESSFUL`.
 - 28 tests, 0 fallos, 0 errores, 0 omitidos.
-- Commit `1b1db72738fecdef3bc054f21d9367b419a65c63`, fecha 2026-11-05.
+- Commit `37533139e1c950d49050eb584c2d9e0e3de4e932`, fecha 2026-11-06.
 - Añade 11 pruebas de Actuator, probes, exposición, access log, contador de correlación y
   reglas de alerta; la CI del PR queda pendiente de registrar.
 
@@ -119,7 +119,7 @@ esa aprobación sigue pendiente y no debe presentarse como obtenida.
 |---|---|---|---|
 | CI | `.github/workflows/ci.yml` define un único job de build/test, escaneo de secretos, escaneo de vulnerabilidades de dependencias sobre `gradle.lockfile`, construcción de la imagen y registro de su identidad; no contiene ruta de publicación | Run 13 sobre `2e54476` y run 41610069726 sobre `8ea03d9`, ambos `success`; el segundo añade el paso `Dependency vulnerability scan` y el artefacto `trivy-report` | Configuración validada por ejecución real; escaneo de dependencias `VERIFICADO` |
 | Packaging | Versión `0.1.0`, JAR ejecutable, imagen OCI con labels de procedencia, identidad, escaneo gitleaks y escaneo Trivy de dependencias con lockfile | Run 13: `artifact-metadata`, `hello-service-0.1.0` y `gitleaks-report`; run 41610069726 añade `trivy-report` | P-10 `CLOSED`; escaneo de dependencias `VERIFICADO` |
-| Pruebas locales | Gradle Wrapper y suite automatizada | 17 tests históricos sobre `f2b03e5`, `72c2ad5` y `870500c`; 28 tests sobre `1b1db72` el 2026-11-05 | Suite actual verde; CI del cambio pendiente de registrar |
+| Pruebas locales | Gradle Wrapper y suite automatizada | 17 tests históricos sobre `f2b03e5`, `72c2ad5` y `870500c`; 28 tests sobre `3753313` el 2026-11-06 | Suite actual verde; CI del cambio pendiente de registrar |
 | Despliegue local | `Dockerfile` OCI, usuario no-root, puerto `8080` y entrypoint del JAR | Procedimiento reproducible verificado el 2026-10-30: build local, imagen `0.1.0`, contenedor como `appuser`, probes en `127.0.0.1:18080` y rollback a `0.0.1-SNAPSHOT` | Procedimiento verificado; registro en `blueprint/deployment/local-0.1.0.md` |
 | Release local / P-11 | Versión `0.1.0`, imagen local y rollback a `0.0.1-SNAPSHOT` | Promoción local registrada el 2026-10-30; rollback ejercitado | P-11 `CLOSED` con autoevaluación; publicaciones remotas registradas; sin aprobación independiente |
 | Observabilidad / P-13 | Logs estructurados con `requestId`, `/api/status` liveness, Actuator liveness/readiness, métricas Prometheus, access log correlacionado y ocho reglas de alerta Prometheus; sin Prometheus/Alertmanager desplegados, dashboard ni evaluación | Registro en `blueprint/observability/hello-service.md`; 28 tests en `blueprint/testing/observability-improvements.md`; reglas en `ops/prometheus/hello-service-alerts.yml`; correlación y runbook verificados el 2026-10-30 | P-13 `CLOSED` con señales automatizadas y alertas definidas; evaluación y paging manuales; sin aprobación independiente |

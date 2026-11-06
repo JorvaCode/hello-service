@@ -123,7 +123,7 @@ observability scope is still local and manual; the remote publications did not a
 automated alerting, metrics, traces or a readiness probe. Phase 13 CI run 41220748392 later
 concluded `success`.
 
-## Post-closure update (2026-11-05)
+## Post-closure update (2026-11-06)
 
 `CHG-OBS-002` implements `IMP-001`, `IMP-003`, `IMP-004` and `IMP-005` under
 `REQ-OBS-001`/`REQ-OBS-002` and ADR-014. `F-2` is partially addressed: metrics now exist at

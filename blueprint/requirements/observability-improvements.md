@@ -115,7 +115,7 @@ Each names the quality attribute it constrains and, where one applies, a thresho
 - Java 21 toolchain and Spring Boot 3.5.14, already used by the project.
 - `spring-boot-starter-actuator` 3.5.14 for health groups and the Actuator endpoint
   infrastructure.
-- `micrometer-registry-prometheus` 1.15.11 and the Prometheus Java client 1.3.10 for the
+- `micrometer-registry-prometheus` 1.15.12 and the Prometheus Java client 1.3.10 for the
   Prometheus exposition format.
 - The existing `spring-boot-starter-web`, `RequestIdFilter`, `logback-spring.xml` and
   `HelloHandler`/`StatusHandler` contracts.

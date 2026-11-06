@@ -79,14 +79,14 @@ capability. The remote publications of `0.1.0` are recorded in
 
 | Check | Endpoint or command | Criteria | Evidence |
 | --- | --- | --- | --- |
-| Application liveness | `GET /api/status` | `200`, `application/json`, body exactly `{"status":"UP"}` while the process serves HTTP; no external dependency consulted | Verified 2026-10-30 on `127.0.0.1:18080`; pre-existing tests remain green at `1b1db72` |
-| Actuator liveness | `GET /actuator/health/liveness` | `200` and a body containing `"status":"UP"` | `ActuatorEndpointTest.livenessProbeReportsUp` at `1b1db72`; jar returned `200 {"status":"UP"}` on `127.0.0.1:18081` on 2026-11-05 |
-| Readiness | `GET /actuator/health/readiness` | `200` and a body containing `"status":"UP"` when the context is ready; no external dependency is checked today | `ActuatorEndpointTest.readinessProbeReportsUp` at `1b1db72`; jar returned `200 {"status":"UP"}` on `127.0.0.1:18081` on 2026-11-05 |
-| Metrics | `GET /actuator/prometheus` | `200`, Prometheus text containing `jvm_memory_used_bytes` and `application="hello-service"` | `ActuatorEndpointTest.prometheusEndpointExposesJvmMetrics` at `1b1db72`; jar returned `200` with 16,179 bytes on 2026-11-05 |
-| Disclosure boundary | `GET /actuator/env` and `GET /actuator/health` | `/actuator/env` is `404`; `/actuator/health` has no `components` object | `ActuatorEndpointTest` at `1b1db72` |
+| Application liveness | `GET /api/status` | `200`, `application/json`, body exactly `{"status":"UP"}` while the process serves HTTP; no external dependency consulted | Verified 2026-10-30 on `127.0.0.1:18080`; pre-existing tests remain green at `3753313` |
+| Actuator liveness | `GET /actuator/health/liveness` | `200` and a body containing `"status":"UP"` | `ActuatorEndpointTest.livenessProbeReportsUp` at `3753313`; jar returned `200 {"status":"UP"}` on `127.0.0.1:18081` on 2026-11-06 |
+| Readiness | `GET /actuator/health/readiness` | `200` and a body containing `"status":"UP"` when the context is ready; no external dependency is checked today | `ActuatorEndpointTest.readinessProbeReportsUp` at `3753313`; jar returned `200 {"status":"UP"}` on `127.0.0.1:18081` on 2026-11-06 |
+| Metrics | `GET /actuator/prometheus` | `200`, Prometheus text containing `jvm_memory_used_bytes` and `application="hello-service"` | `ActuatorEndpointTest.prometheusEndpointExposesJvmMetrics` at `3753313`; jar returned `200` with 16,178 bytes on 2026-11-06 |
+| Disclosure boundary | `GET /actuator/env` and `GET /actuator/health` | `/actuator/env` is `404`; `/actuator/health` has no `components` object | `ActuatorEndpointTest` at `3753313` |
 | Startup | `podman logs hello-service` | Log contains `Starting HelloApplication v0.1.0`, `Tomcat started on port 8080` and `Started HelloApplication` | Verified 2026-10-30 |
-| Correlation and access log | `POST /api/hello` with a known `X-Request-ID` | Response echoes the header and exactly one access-log line carries the same `requestId` | `RequestAccessLogFilterTest` at `1b1db72`; live correlation verified 2026-10-30 with `p13-correlation-test` and 2026-11-05 on the jar with `d-jar-evidence` |
-| Missing-correlation counter | `GET /actuator/prometheus` | `hello_service_access_log_missing_request_id_total` is present; normal HTTP traffic resolves an id, so it stays `0.0` | Jar metric on 2026-11-05; non-zero path covered by `RequestAccessLogFilterTest.countsEntriesWithoutRequestId` |
+| Correlation and access log | `POST /api/hello` with a known `X-Request-ID` | Response echoes the header and exactly one access-log line carries the same `requestId` | `RequestAccessLogFilterTest` at `3753313`; live correlation verified 2026-10-30 with `p13-correlation-test` and 2026-11-06 on the jar with `d-jar-evidence` |
+| Missing-correlation counter | `GET /actuator/prometheus` | `hello_service_access_log_missing_request_id_total` is present; normal HTTP traffic resolves an id, so it stays `0.0` | Jar metric on 2026-11-06; non-zero path covered by `RequestAccessLogFilterTest.countsEntriesWithoutRequestId` |
 
 `/api/status` remains the application-level liveness signal only. It is not a readiness check
 and it does not report dependency health. `/actuator/health/readiness` is the separate
@@ -307,14 +307,14 @@ image is `localhost/hello-service:0.0.1-SNAPSHOT` from commit `f2b03e5`.
 | Unknown path | `Invoke-WebRequest http://127.0.0.1:18080/api/nope` | `404` |
 | Unsupported method | `POST /api/hello` | `405`; warning log with generated `requestId` |
 | Correlation | `POST /api/hello` with `X-Request-ID: p13-correlation-test` | `405`; response header echoed; log line `[requestId=p13-correlation-test]` |
-| Actuator liveness/readiness | `ActuatorEndpointTest` at `1b1db72` | Both `200`, body contains `"status":"UP"` |
-| Prometheus metrics | `ActuatorEndpointTest` at `1b1db72` | `200`; `jvm_memory_used_bytes`; `application="hello-service"` |
-| Actuator exposure | `ActuatorEndpointTest` at `1b1db72` | `/actuator/env` -> `404`; `/actuator/health` has no `components` |
-| Access log | `RequestAccessLogFilterTest` at `1b1db72` | One line with method/path/status/duration/requestId; query omitted; `status=500` and rethrow on failure; missing-id counter increments |
-| Alert rules | `AlertRulesTest` at `1b1db72` | Eight rules parse; each has expression, duration, severity, service and runbook |
-| Jar liveness/readiness | `java -jar build\libs\hello-service-0.1.0.jar --server.port=18081`; `GET /actuator/health/liveness`, `/readiness` on 2026-11-05 | Both `200`, body `{"status":"UP"}` |
-| Jar Prometheus/counter | `GET /actuator/prometheus` on 2026-11-05 | `200`, 16,179 bytes; `jvm_memory_used_bytes`; `application="hello-service"`; `hello_service_access_log_missing_request_id_total 0.0` |
-| Jar access log | `GET /api/hello` with `X-Request-ID: d-jar-evidence` on 2026-11-05 | `200`, `Hello, World!`; four access-log lines, the hello line carrying `requestId=d-jar-evidence` |
+| Actuator liveness/readiness | `ActuatorEndpointTest` at `3753313` | Both `200`, body contains `"status":"UP"` |
+| Prometheus metrics | `ActuatorEndpointTest` at `3753313` | `200`; `jvm_memory_used_bytes`; `application="hello-service"` |
+| Actuator exposure | `ActuatorEndpointTest` at `3753313` | `/actuator/env` -> `404`; `/actuator/health` has no `components` |
+| Access log | `RequestAccessLogFilterTest` at `3753313` | One line with method/path/status/duration/requestId; query omitted; `status=500` and rethrow on failure; missing-id counter increments |
+| Alert rules | `AlertRulesTest` at `3753313` | Eight rules parse; each has expression, duration, severity, service and runbook |
+| Jar liveness/readiness | `java -jar build\libs\hello-service-0.1.0.jar --server.port=18081`; `GET /actuator/health/liveness`, `/readiness` on 2026-11-06 | Both `200`, body `{"status":"UP"}` |
+| Jar Prometheus/counter | `GET /actuator/prometheus` on 2026-11-06 | `200`, 16,178 bytes; `jvm_memory_used_bytes`; `application="hello-service"`; `hello_service_access_log_missing_request_id_total 0.0` |
+| Jar access log | `GET /api/hello` with `X-Request-ID: d-jar-evidence` on 2026-11-06 | `200`, `Hello, World!`; four access-log lines, the hello line carrying `requestId=d-jar-evidence` |
 | Startup log | `podman logs hello-service` | `Starting HelloApplication v0.1.0`; `Tomcat started on port 8080`; `Started HelloApplication` |
 
 The rehearsal container was started from the promoted local image and removed after
@@ -332,7 +332,7 @@ The phase 13 quality gate is met for the local scope:
 - Every detection check names the response it triggers and links to a runbook anchor.
 - A responder who was not on call can follow the runbook without asking the author.
 - Liveness/readiness probes, the Prometheus endpoint, the correlated access log and eight alert
-  rules are implemented and covered by automated tests at `1b1db72`.
+  rules are implemented and covered by automated tests at `3753313`.
 
 Limitations recorded, not hidden:
 
@@ -366,7 +366,7 @@ can detect and what it cannot.
 | Existing observability decision | `blueprint/architecture/api-status-endpoint.md` section "Observability" |
 | Correlation residual risk | `blueprint/reviews/api-status-endpoint.md` (`X-Request-ID` log injection) |
 | Improvement items | `IMP-001` (metrics), `IMP-003` (readiness), `IMP-004` (alert definitions) and `IMP-005` (access logging) implemented; live evaluation/paging remains absent |
-| Test evidence | `blueprint/testing/observability-improvements.md` (`1b1db72`; 28 tests) |
+| Test evidence | `blueprint/testing/observability-improvements.md` (`3753313`; 28 tests) |
 | Alert rules | `ops/prometheus/hello-service-alerts.yml`; `ops/prometheus/README.md` |
 | Change record | `blueprint/changes/p13-observability.md`; `blueprint/changes/observability-improvements.md` |
 | Review record | `blueprint/reviews/observability-closure.md`; `blueprint/reviews/observability-improvements.md` |

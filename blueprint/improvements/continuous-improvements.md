@@ -103,7 +103,7 @@ Requirements, observability design and deployment configuration.
 
 **Status:** Implemented 2026-11-03 — `REQ-OBS-001`, ADR-014 and `CHG-OBS-002` add
 Actuator/Micrometer Prometheus metrics at `/actuator/prometheus`. Evidence:
-`blueprint/testing/observability-improvements.md` (28 tests at `1b1db72`) and
+`blueprint/testing/observability-improvements.md` (28 tests at `3753313`) and
 `blueprint/changes/observability-improvements.md`. No metrics backend is delivered; the eight
 alert-rule definitions are recorded under `IMP-004`, but no evaluation or paging path exists.
 Loop closed by implementation.
@@ -152,7 +152,7 @@ Requirements, architecture, deployment and observability.
 Actuator liveness and readiness groups at `/actuator/health/liveness` and
 `/actuator/health/readiness`. The readiness group is `UP` when the context is ready and does
 not check an external dependency because none exists. Evidence:
-`blueprint/testing/observability-improvements.md` (28 tests at `1b1db72`). Loop closed by
+`blueprint/testing/observability-improvements.md` (28 tests at `3753313`). Loop closed by
 implementation.
 
 ---
@@ -177,11 +177,11 @@ PoC. The current detection is manual; there is no paging path or dashboard.
 **Potential impact:**
 Observability, deployment and operating model.
 
-**Status:** Implemented 2026-11-05 at the definition level — `REQ-OBS-002` and
+**Status:** Implemented 2026-11-06 at the definition level — `REQ-OBS-002` and
 `CHG-OBS-002` add eight Prometheus rules mapped to `FM-01`...`FM-07` plus the `HELLO-001`
 contract, each with a severity and runbook URL, and a README for the required
 application/blackbox jobs. Evidence:
-`blueprint/testing/observability-improvements.md` (`AlertRulesTest`, 28 tests at `1b1db72`).
+`blueprint/testing/observability-improvements.md` (`AlertRulesTest`, 28 tests at `3753313`).
 No Prometheus, Alertmanager, blackbox exporter or paging path is deployed; evaluation,
 routing and tuning remain outside the local PoC. Loop closed for the definition gap, with the
 live-alerting limitation recorded.
@@ -208,11 +208,11 @@ framework error logs. The current correlation is demonstrated on error paths onl
 **Potential impact:**
 Implementation, tests and log-injection review.
 
-**Status:** Implemented 2026-11-05 — `RequestAccessLogFilter` emits one correlated
+**Status:** Implemented 2026-11-06 — `RequestAccessLogFilter` emits one correlated
 `access method=… path=… status=… duration_ms=… requestId=…` line per request, with query
 strings and bodies omitted, and a missing `requestId` increments
 `hello_service_access_log_missing_request_id_total`. Evidence: `RequestAccessLogFilterTest`
-(5 tests) at `1b1db72`,
+(5 tests) at `3753313`,
 recorded in `blueprint/testing/observability-improvements.md` and
 `blueprint/changes/observability-improvements.md`. Log shipping, sampling and retention remain
 unimplemented and are recorded as limitations, not as a separate open item. Loop closed by
@@ -239,7 +239,7 @@ post-closure remote publication enters the lifecycle at phase 11 and is recorded
 | --- | --- | --- | --- | --- |
 | Phase 14 register | Added an owner, named artifact, feedback evidence and closure state to `IMP-001` … `IMP-005`; added this lifecycle record and closure | `blueprint/reviews/continuous-improvement-closure.md`; local test run 2026-10-30T18:45:20Z (17 tests, 0 failures); phase 14 CI run 41225786925 (`success`); phase 13 CI run 41220748392 (`success`) | None | None; `0.1.0` local release unchanged |
 | `IMP-001` … `IMP-005` | At phase 14 closure: no implementation; all remained `Deferred` | No implementation evidence existed at closure; each item's loop remained open | None | None |
-| Post-closure `IMP-001`, `IMP-003`, `IMP-004`, `IMP-005` | Implemented metrics, readiness/liveness probes, access logging and alert-rule definitions | `REQ-OBS-001`/`REQ-OBS-002`; `CHG-OBS-002`; 28 tests at `1b1db72`; recorded in `blueprint/testing/observability-improvements.md` | Added `REQ-OBS-001` (`FR-01`…`FR-08`, `NFR-01`…`NFR-07`) and `REQ-OBS-002` | Existing `0.1.0` artifact line; no new release or tag |
+| Post-closure `IMP-001`, `IMP-003`, `IMP-004`, `IMP-005` | Implemented metrics, readiness/liveness probes, access logging and alert-rule definitions | `REQ-OBS-001`/`REQ-OBS-002`; `CHG-OBS-002`; 28 tests at `3753313`; recorded in `blueprint/testing/observability-improvements.md` | Added `REQ-OBS-001` (`FR-01`…`FR-08`, `NFR-01`…`NFR-07`) and `REQ-OBS-002` | Existing `0.1.0` artifact line; no new release or tag |
 | `IMP-004` | Implemented at the definition level: eight Prometheus alert rules and their scrape/probe documentation | `ops/prometheus/hello-service-alerts.yml`, `ops/prometheus/README.md`, `AlertRulesTest`; no Prometheus/Alertmanager/paging deployment | Added `REQ-OBS-002` | None; configuration evidence only |
 
 The closure record closes the phase 14 register change as it stood on 2026-10-30. It did not
@@ -269,7 +269,7 @@ implemented under phase 13 by `REQ-OBS-001`/`REQ-OBS-002`, ADR-014 and `CHG-OBS-
 change adds Actuator liveness/readiness probes, Micrometer Prometheus metrics, a correlated
 access log and eight Prometheus alert-rule definitions. It does not add a metrics backend,
 dashboard, deployed rule evaluation or paging path; that limitation is recorded. Evidence is
-the 28-test suite at `1b1db72`, recorded in
+the 28-test suite at `3753313`, recorded in
 `blueprint/testing/observability-improvements.md`, and the review in
 `blueprint/reviews/observability-improvements.md`. No new release or tag was created; the
 change ships in the existing `0.1.0` artifact line.

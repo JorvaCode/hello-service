@@ -9,10 +9,10 @@
   dependencies, `ops/prometheus/hello-service-alerts.yml` and their tests.
 - Environment: Windows, PowerShell 5.1, Java 21, Spring Boot 3.5.14 with embedded Tomcat,
   Gradle wrapper 8.14.2, offline dependency cache, no daemon.
-- Date: 2026-11-05.
-- Commit basis: `1b1db72` (`feat(observability): signal missing request correlation`),
-  following `3eab4a8`, `101ea28` and `90d0227`.
-- Working tree: the code/test tree of `1b1db72` was tested; the Blueprint documents are
+- Date: 2026-11-06.
+- Commit basis: `3753313` (`fix(observability): update micrometer for security advisories`),
+  following `1b1db72`, `3eab4a8`, `101ea28` and `90d0227`.
+- Working tree: the code/test tree of `3753313` was tested; the Blueprint documents are
   documentation-only follow-up changes.
 
 ## Test suite
@@ -30,29 +30,30 @@
 
 ## Test run result
 
-- Commit basis: `1b1db72` (code/test tree); the run used the local checkout before the
+- Commit basis: `3753313` (code/test tree); the run used the local checkout before the
   documentation-only changes.
 - Environment: Windows, PowerShell 5.1, Java 21, Spring Boot 3.5.14 with embedded Tomcat,
   Gradle wrapper 8.14.2, offline dependency cache, no daemon.
-- Date: 2026-11-05; test lifecycle completed at `19:42:58 +01:00`.
+- Date: 2026-11-06; test lifecycle completed at `15:59:36 +01:00`.
 - Command: `.\gradlew.bat clean test --offline --no-daemon --console=plain`
-- Result: `BUILD SUCCESSFUL` in 16 s.
+- Result: `BUILD SUCCESSFUL` in 10 s.
 - Counts: 28 tests, 0 failures, 0 errors, 0 skipped.
 - Evidence: `build/test-results/test/*.xml`; the seven suite files record 28 tests with 0
   failures, 0 errors and 0 skipped.
 
 ## Executed jar verification
 
-The packaged jar was built with `.\gradlew.bat bootJar --offline --no-daemon --console=plain`
-(`BUILD SUCCESSFUL`, `build/libs/hello-service-0.1.0.jar`, 26,199,658 bytes) and run on
-`127.0.0.1:18081` with `java -jar build\libs\hello-service-0.1.0.jar --server.port=18081`.
+On 2026-11-06 the packaged jar was built with `.\gradlew.bat bootJar --offline --no-daemon
+--console=plain` (`BUILD SUCCESSFUL`, `build/libs/hello-service-0.1.0.jar`, 26,201,884 bytes)
+and run on `127.0.0.1:18081` with `java -jar build\libs\hello-service-0.1.0.jar
+--server.port=18081`.
 
 | Check | Result |
 | --- | --- |
 | `GET /actuator/health/liveness` | `200`, body `{"status":"UP"}` |
 | `GET /actuator/health/readiness` | `200`, body `{"status":"UP"}` |
 | `GET /api/hello` with `X-Request-ID: d-jar-evidence` | `200`, `Hello, World!`; response header and access-log line both carry `d-jar-evidence` |
-| `GET /actuator/prometheus` | `200`, 16,179 bytes; contains `jvm_memory_used_bytes` and `application="hello-service"` |
+| `GET /actuator/prometheus` | `200`, 16,178 bytes; contains `jvm_memory_used_bytes` and `application="hello-service"` |
 | Missing-correlation counter | `hello_service_access_log_missing_request_id_total{application="hello-service"} 0.0`; the HTTP path always resolves an id, so the non-zero case is covered by `countsEntriesWithoutRequestId` |
 | Access log | Four `access method=... path=... status=... duration_ms=... requestId=...` lines for the probes, hello and metrics requests; query strings absent |
 
@@ -115,7 +116,7 @@ No open defect remains for the tested behaviour.
 - Test execution and criterion coverage pass: 28 tests, 0 failures, every AC has automated
   verification or a named review check.
 - Scenario coverage is recorded for QAS-01–QAS-07.
-- The local test run is commit-bound to the code/test tree of `1b1db72`; later commits in this
+- The local test run is commit-bound to the code/test tree of `3753313`; later commits in this
   change set are documentation-only.
 - F-01 is fixed and covered by `ActuatorEndpointTest.prometheusEndpointExposesJvmMetrics`.
 - Checked against `blueprint/06-testing.md`: the suite, run result (environment, commit,

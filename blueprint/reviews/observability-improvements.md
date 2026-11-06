@@ -18,7 +18,7 @@
   `blueprint/observability/hello-service.md`, `blueprint/improvements/continuous-improvements.md`,
   `blueprint/gates.md`, `README.md`, `blueprint/changes/observability-improvements.md`.
 - Checklist: `blueprint/07-code-review.md`.
-- Evidence: local test run at `1b1db72738fecdef3bc054f21d9367b419a65c63` on 2026-11-05
+- Evidence: local test run at `37533139e1c950d49050eb584c2d9e0e3de4e932` on 2026-11-06
   (`BUILD SUCCESSFUL`; 28 tests, 0 failures, 0 errors, 0 skipped); PR CI to be recorded.
 
 This is a self-review by the agent that produced the change. It is not an independent review.
@@ -98,7 +98,7 @@ No requirement is changed by this review.
 
 ### 7. Tests adequate?
 
-- Local run at `1b1db72`: 28 tests, 0 failures, 0 errors, 0 skipped.
+- Local run at `3753313`: 28 tests, 0 failures, 0 errors, 0 skipped.
 - New coverage: 5 Actuator tests, 5 access-log/counter tests and 1 alert-rule test.
 - All `REQ-OBS-001` and `REQ-OBS-002` acceptance criteria have a named automated or inspection
   check.
@@ -166,4 +166,4 @@ tested; all findings have a disposition. Independent approval is not claimed.
 - Independence limitation: the repository is a single-maintainer repository and no independent
   human reviewer is recorded. This record does not satisfy the independence clause of the phase
   07 quality gate and does not claim independent approval.
-- Date: 2026-11-05.
+- Date: 2026-11-06.

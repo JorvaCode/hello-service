@@ -35,9 +35,10 @@ and affects consumers, so it meets `standards/terms.md` criteria (c), (d) and (e
 ## Implementation
 
 - `build.gradle.kts`: add `spring-boot-starter-actuator` and
-  `micrometer-registry-prometheus`.
+  `micrometer-registry-prometheus`; pin `micrometer.version=1.15.12` because CI Trivy rejected
+  the Boot-managed 1.15.11 for `CVE-2026-40983` and `CVE-2026-40984`.
 - `gradle.lockfile`: lock the resolved Actuator, Micrometer, Prometheus client and transitive
-  dependencies.
+  dependencies at Micrometer 1.15.12.
 - `src/main/resources/application.properties`: new Actuator configuration.
 - `src/main/java/com/example/hello/RequestAccessLogFilter.java`: new filter at
   `Ordered.HIGHEST_PRECEDENCE + 10`, after `RequestIdFilter`.
@@ -70,12 +71,13 @@ and affects consumers, so it meets `standards/terms.md` criteria (c), (d) and (e
 ## Tests
 
 - Code/test commits: `90d0227` (initial implementation), `101ea28` (exposure/exception tests),
-  `3eab4a8` (alert-rule definitions and validation) and `1b1db72` (missing-correlation signal).
+  `3eab4a8` (alert-rule definitions and validation), `1b1db72` (missing-correlation signal) and
+  `3753313` (Micrometer 1.15.12 security pin).
 - Local command: `.\gradlew.bat clean test --offline --no-daemon --console=plain`.
-- Local result at `1b1db72`: `BUILD SUCCESSFUL`; 28 tests, 0 failures, 0 errors, 0 skipped.
+- Local result at `3753313`: `BUILD SUCCESSFUL`; 28 tests, 0 failures, 0 errors, 0 skipped.
 - New tests: `ActuatorEndpointTest` 5; `RequestAccessLogFilterTest` 5; `AlertRulesTest` 1.
   Existing 17 tests pass unchanged.
-- Executed jar on 2026-11-05: bootJar built, `127.0.0.1:18081` probes returned `200
+- Executed jar on 2026-11-06: bootJar built, `127.0.0.1:18081` probes returned `200
   {"status":"UP"}`, `/actuator/prometheus` returned `200` with JVM metrics, the
   `application="hello-service"` tag and the missing-correlation counter, and `/api/hello` with
   `X-Request-ID: d-jar-evidence` produced a correlated access-log line.
@@ -136,7 +138,7 @@ None. No test or artifact is removed.
   The phase 13 gate remains **CLOSED with the limitation that rules are not deployed or
   evaluated**: no Prometheus, Alertmanager, blackbox exporter, dashboard or paging path is
   operated. `IMP-004` is closed at the definition level, not at the live-alerting level.
-- The local test evidence is commit-bound to `1b1db72`; this change record and the other
+- The local test evidence is commit-bound to `3753313`; this change record and the other
   Blueprint documents are documentation-only follow-up commits.
 - PR CI evidence is appended to `blueprint/testing/observability-improvements.md` after the
   PR run.

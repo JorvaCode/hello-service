@@ -26,7 +26,7 @@
   `health,info,prometheus`, enables health probes, hides health details, tags metrics with
   `application=hello-service` and explicitly enables the Prometheus registry.
 - **Dependencies under test:** `spring-boot-starter-actuator` 3.5.14,
-  `micrometer-registry-prometheus` 1.15.11, its Prometheus Java client 1.3.10 and the
+  `micrometer-registry-prometheus` 1.15.12, its Prometheus Java client 1.3.10 and the
   transitive `micrometer-core`/`HdrHistogram`/`LatencyUtils` dependencies. `gradle.lockfile`
   records the resolved set.
 - **Baseline and current tests:** the pre-change suite had 17 tests. The current suite has 28
@@ -53,7 +53,7 @@
 | Dependency / integration | Role for this change | Evidence | Impact |
 | --- | --- | --- | --- |
 | Spring Boot Actuator 3.5.14 | Health endpoints, health groups, endpoint exposure model | Dependency added; `application.properties`; `ActuatorEndpointTest` | New runtime dependency and operational endpoints |
-| Micrometer Prometheus registry 1.15.11 | Binds a `PrometheusMeterRegistry` and the `/actuator/prometheus` endpoint | Dependency added; Prometheus test | New runtime dependency and metrics output |
+| Micrometer Prometheus registry 1.15.12 | Binds a `PrometheusMeterRegistry` and the `/actuator/prometheus` endpoint; the patch level is pinned above the 1.15.11 CVEs | Dependency added; Prometheus test | New runtime dependency and metrics output |
 | Prometheus Java client 1.3.10 | Text exposition format | Transitive dependency in `gradle.lockfile` | New transitive dependencies, scanned by Trivy |
 | Spring MVC / embedded Tomcat | Existing request pipeline and HTTP listener | Existing application and tests | Reused; no deployment topology change |
 | `RequestIdFilter` | Supplies `requestId` to the access log | Existing filter and MDC contract | Filter must run first; access filter order is `HIGHEST_PRECEDENCE + 10` |
@@ -115,7 +115,7 @@ change adds no alerting backend and does not replace `/api/status`.
 | A-03 | The Actuator endpoints are not publicly reachable in the local PoC. | `info`/`prometheus` become an information-disclosure surface and require authentication. | Recorded in the requirement; local deployment boundary unchanged. |
 | A-04 | The existing `RequestIdFilter` is the source of the access-log correlation ID. | A second ID scheme would disagree with the response header and existing logs. | Confirmed by inspection and the composed filter test. |
 | A-05 | The `requestId` may contain client-controlled text and remains a log-injection vector. | A malicious header could inject log content. | Accepted residual risk from `blueprint/reviews/api-status-endpoint.md`; no new input is added. |
-| A-06 | The local Gradle cache can resolve the new dependencies offline. | The local test command would fail without network and the test evidence would not be reproducible offline. | Confirmed by the green offline run at `1b1db72`. |
+| A-06 | The local Gradle cache can resolve the new dependencies offline. | The local test command would fail without network and the test evidence would not be reproducible offline. | Confirmed by the green offline run at `3753313`. |
 | A-07 | Actuator auto-configuration is active in the default profile and is not conditional on a feature flag. | The probes/metrics could be missing despite the configuration. | Confirmed by the `@SpringBootTest` Actuator tests and the default `application.properties`. |
 
 ## Discrepancies between existing artifacts and the implementation
@@ -213,7 +213,7 @@ No other conflict was found.
 
 The direction is implementable with the current tree. The required dependencies resolve
 offline, Actuator auto-configures the probes and Prometheus endpoint, and the access log can use
-the existing MDC. The implementation and tests are present at commit `1b1db72`; the remaining
+the existing MDC. The implementation and tests are present at commit `3753313`; the remaining
 work is documentation reconciliation and PR CI.
 
 ## Traceability
@@ -239,7 +239,7 @@ work is documentation reconciliation and PR CI.
 | Check | Command / method | Result |
 | --- | --- | --- |
 | Existing baseline | Prior phase evidence | 17 tests green before this change |
-| Current suite | `.\gradlew.bat clean test --offline --no-daemon --console=plain` at `1b1db72` | `BUILD SUCCESSFUL`; 28 tests, 0 failures, 0 errors, 0 skipped |
+| Current suite | `.\gradlew.bat clean test --offline --no-daemon --console=plain` at `3753313` | `BUILD SUCCESSFUL`; 28 tests, 0 failures, 0 errors, 0 skipped |
 | Per class | Gradle test XML | `ActuatorEndpointTest` 5, `AlertRulesTest` 1, `HelloEndpointTest` 6, `HelloHandlerTest` 3, `RequestAccessLogFilterTest` 5, `StatusEndpointTest` 6, `StatusHandlerTest` 2 |
 | Actuator probes | `ActuatorEndpointTest` | Liveness/readiness `200`, body contains `"status":"UP"` |
 | Prometheus | `ActuatorEndpointTest` | `200`, contains `jvm_memory_used_bytes` and `application="hello-service"` |

@@ -98,4 +98,4 @@ paging remain outside this decision.
 
 ## Date
 
-2026-11-03 (updated 2026-11-05 for `IMP-004` alert definitions)
+2026-11-03 (updated 2026-11-06 for `IMP-004` alert definitions and Micrometer security pin)

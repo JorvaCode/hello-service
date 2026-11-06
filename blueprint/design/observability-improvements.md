@@ -2,7 +2,7 @@
 
 ## Status
 
-Implementation-ready design. Implemented at commit `1b1db72` (`feat/observability-improvements`);
+Implementation-ready design. Implemented at commit `3753313` (`feat/observability-improvements`);
 this document and the other Blueprint records are the documentation follow-up. The design
 translates `blueprint/architecture/observability-improvements.md` and ADR-014 into code and
 tests. Every element names the requirement it satisfies.
@@ -282,7 +282,7 @@ None. No test or artifact is deleted.
 
 ## Review and approval
 
-Implemented and self-reviewed on 2026-11-05. The review is a solo-maintainer self-review in
+Implemented and self-reviewed on 2026-11-06. The review is a solo-maintainer self-review in
 `blueprint/reviews/observability-improvements.md`; independent approval is unavailable. The
 design is accepted for the local PoC scope, not for public exposure or production alert
 evaluation/paging.
