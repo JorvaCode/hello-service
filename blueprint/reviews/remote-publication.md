@@ -132,3 +132,9 @@ approval remains unavailable.
   solo-maintainer self-review; it does not claim an independent approval. If the process
   requires one, the maintainer must obtain and record it.
 - Date: 2026-11-01.
+
+## Post-review note
+
+The remote-rollback limitation in this 2026-11-01 review was closed by `CHG-DEL-005` on
+2026-11-06: staging deployment run 42241159036 and remote rollback run 42241543717 both
+succeeded. This note does not change the verdict for the 2026-11-01 publications.

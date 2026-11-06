@@ -66,7 +66,8 @@ Checks:
 
 Result: promoted to the `local` environment. Two separate remote publications of `0.1.0`
 were performed by `cd.yml` on 2026-11-01; see "Remote publications (post-closure)" below.
-No remote promotion to a second environment is claimed.
+A later staging promotion and remote rollback were exercised on 2026-11-06; see the
+corresponding section below.
 
 ## Remote publications (post-closure)
 
@@ -88,8 +89,8 @@ push publication is now disabled; `cd.yml` requires `workflow_dispatch`.
 | First remote digest (superseded) | `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b` |
 | Deploy | by digest, `quay.io/odysseia/hello-service@sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17` |
 | Smoke test | `GET /api/hello` -> `200`, `text/plain;charset=UTF-8`, `Hello, World!` |
-| Promotion | mechanism prepared; no second environment executed |
-| Remote rollback | not exercised; no previous remote release recorded |
+| Promotion at publication time | mechanism prepared; no second environment executed |
+| Remote rollback at publication time | not exercised; no previous remote release recorded |
 
 The remote images are separate builds from the local artifact above. The local image ID and
 JAR SHA-256 identify the local promotion at `870500c`; the remote digests identify the
@@ -97,6 +98,29 @@ CD builds at `c7d3a86` and `21772cc`. The tag `0.1.0` is mutable; the current di
 immutable identity of the published remote artifact. The remote publications are recorded
 in `blueprint/changes/p11-remote-publication.md` and reviewed in
 `blueprint/reviews/remote-publication.md`.
+
+## Staging promotion and remote rollback (post-closure, 2026-11-06)
+
+`cd.yml` was extended with `target_environment` and `image_digest`. From `main` at
+`6d5fa89`, the current `0.1.0` digest was deployed to the GitHub `staging` environment, then
+a remote rollback by digest was exercised:
+
+| Event | Run | Digest | Result |
+| --- | --- | --- | --- |
+| Staging deployment | [42241159036](https://github.com/JorvaCode/hello-service/actions/runs/42241159036) | `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17` | `success`; smoke `200` / `text/plain;charset=UTF-8` / `Hello, World!` |
+| Unavailable rollback target | [42241318818](https://github.com/JorvaCode/hello-service/actions/runs/42241318818) | `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b` | `failure`; `manifest unknown` |
+| Remote rollback | [42241543717](https://github.com/JorvaCode/hello-service/actions/runs/42241543717) | `sha256:81ca2f236241fe443f4d1633b254dcc2b90e32fd3bc07b35e5969be3e7e9b833` (`0.0.1-SNAPSHOT`) | `success`; smoke `200` / `text/plain;charset=UTF-8` / `Hello, World!` |
+
+The rollback target is the newest pullable `0.0.1-SNAPSHOT` digest. The superseded `0.1.0`
+digest remains listed by the Quay tag API but was not pullable on 2026-11-06; rollback
+procedures must verify pullability before selecting a digest. The staging environment is
+left on the `0.0.1-SNAPSHOT` digest after the exercised rollback.
+
+This is a staging-environment promotion and rollback on the GitHub Actions runner, not an
+external production host. The deployment record is
+`blueprint/deployment/remote-staging-0.1.0.md`; test evidence is
+`blueprint/testing/staging-rollback.md`; the change is
+`blueprint/changes/p11-staging-rollback.md`.
 
 ## Rollback plan and rehearsal
 
@@ -131,13 +155,17 @@ Rehearsal result (2026-10-30):
   repository is a single-maintainer repository and no independent human reviewer is
   recorded. This record does not claim an independent approval; `standards/git.md`
   requires the single-maintainer fact to be recorded rather than simulated.
-- Gate: P-11 is `CLOSED` for the local promotion and the remote publications with the
-  self-approval above; it does not claim an independent approval.
+- Gates: P-11 is `CLOSED` for the local promotion, remote publications, staging deployment
+  and remote rollback; P-12 is `CLOSED` for the local and staging deployment records. Both
+  close with the self-approval above and do not claim an independent approval.
 - Remote publications to Quay were completed on 2026-11-01 by CD runs 41332436297 and
   41334455398; see "Remote publications (post-closure)" above. The current digest is
-  `0d8deff`; the first digest is superseded. No remote promotion to a second environment
-  or remote rollback is claimed.
+  `0d8deff`; the first digest is superseded.
+- A staging promotion and remote rollback by digest were exercised on 2026-11-06 by CD runs
+  42241159036 and 42241543717; the unavailable target attempt is run 42241318818. The
+  `staging` environment is a GitHub environment restricted to `main`, but the container
+  runs on the GitHub Actions runner; no external production host or independent approval
+  is claimed.
 - The `local` environment is not staging or production; the local promotion result is
-  scoped to `local`. The remote deployment ran in the GitHub Actions runner and is not a
-  staging or production environment.
+  scoped to `local`.
 - `/api/status` is a liveness signal, not a readiness or dependency health check.

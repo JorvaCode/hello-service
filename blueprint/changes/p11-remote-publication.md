@@ -112,3 +112,10 @@ masked by the workflow.
 ## Review
 
 `blueprint/reviews/remote-publication.md`.
+
+## Superseded limitation
+
+The statement that no second environment existed and no remote rollback was exercised was
+true for this 2026-11-01 change. `CHG-DEL-005` later added staging selection and the
+digest rollback path and exercised both on 2026-11-06; see
+`blueprint/changes/p11-staging-rollback.md`.

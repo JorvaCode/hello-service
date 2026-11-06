@@ -62,9 +62,33 @@ Both post-deployment smoke tests `GET /api/hello` returned `200`,
 points to the second digest. Automatic push publication is now disabled; publication
 requires `workflow_dispatch`.
 
-The promotion mechanism was prepared for the same digest, but no second environment was
-configured, so end-to-end promotion was not executed. A remote rollback was not exercised;
-no previous remote release is recorded. The local deployment and rollback record remains
+At the time of those 2026-11-01 publications, the promotion mechanism was prepared for the
+same digest but no second environment was configured, so end-to-end promotion was not
+executed and no remote rollback was exercised. That limitation was closed on 2026-11-06;
+see the next section. The local deployment and rollback record remains
 `blueprint/deployment/local-0.1.0.md`. The remote deployments are recorded in
 `blueprint/changes/p11-remote-publication.md` and reviewed in
 `blueprint/reviews/remote-publication.md`.
+
+## Remote staging deployment and rollback - 2026-11-06
+
+On 2026-11-06, `cd.yml` was dispatched from `main` at `6d5fa89` to the GitHub `staging`
+environment in digest mode:
+
+| Event | Run | Digest | Result |
+| --- | --- | --- | --- |
+| Staging deployment | 42241159036 | `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17` | `success`; `GET /api/hello` -> `200`, `text/plain;charset=UTF-8`, `Hello, World!` |
+| Unavailable rollback target | 42241318818 | `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b` | `failure`; `manifest unknown` before deployment |
+| Remote rollback | 42241543717 | `sha256:81ca2f236241fe443f4d1633b254dcc2b90e32fd3bc07b35e5969be3e7e9b833` (`0.0.1-SNAPSHOT`) | `success`; `GET /api/hello` -> `200`, `text/plain;charset=UTF-8`, `Hello, World!` |
+
+The staging deployment and rollback used the same digest-derived image path, with no
+`podman build` or tag overwrite. The environment is left on the `0.0.1-SNAPSHOT` digest
+after the rollback. The superseded `0.1.0` digest was listed by Quay but was not pullable;
+the failure is recorded as F-01 in `blueprint/testing/staging-rollback.md`.
+
+The deployment record is `blueprint/deployment/remote-staging-0.1.0.md`; the change is
+`blueprint/changes/p11-staging-rollback.md`; the review is
+`blueprint/reviews/staging-rollback.md`. The `staging` environment is a GitHub environment
+restricted to `main`; the container still runs on the GitHub Actions runner, not an
+external host. The review is a solo-maintainer self-review and does not claim independent
+approval.

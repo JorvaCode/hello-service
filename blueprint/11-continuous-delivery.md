@@ -68,24 +68,29 @@ step:
 - Remote publications to Quay were completed for `0.1.0` on 2026-11-01; the current digest
   is
   `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17`;
-  see `blueprint/changes/p11-remote-publication.md`. Promotion to a second environment is
-  not executed.
+  see `blueprint/changes/p11-remote-publication.md`.
+- A staging promotion by digest and a remote rollback by digest were executed on
+  2026-11-06 from `main` at `6d5fa89`; see "Staging promotion and remote rollback records"
+  below and `blueprint/deployment/remote-staging-0.1.0.md`.
 - `ci.yml` no longer contains a publication path: it builds, tests and records the image
   identity only. No publication by that workflow is claimed.
 - `cd.yml` contains the remote publication path through `workflow_dispatch`, including
-  OIDC, registry login and image push. The automatic `push` trigger is removed after two
-  post-closure publications; publication requires an explicit dispatch. The job runs in
-  the `production` environment, restricted to `main`.
+  OIDC, registry login and image push, plus the existing-digest deployment path used for
+  promotion and rollback. The automatic `push` trigger is removed after two post-closure
+  publications; publication requires an explicit dispatch. The job runs in the selected
+  GitHub environment, `staging` or `production`, both restricted to `main`.
 - The local promotion of `0.1.0` is recorded and its rollback path was rehearsed. The
-  remote publications are recorded separately. Git tags are protected by the
-  `immutable-release-tags` ruleset and an existing Quay tag is refused unless
-  `allow_republish=true`; the digest remains the immutable identity.
-- The gate identifiers P-02, P-06, P-07, P-10 and P-11 are defined in `blueprint/gates.md`.
-- P-11 is closed with the local promotion and remote publication evidence and a
-  solo-maintainer self-approval; the record does not claim an independent approval. P-02
-  is closed with a solo-maintainer analysis self-review for the documentation and CI
-  closure change set; P-07 is closed with the same limitation. The Quality gate above
-  remains applicable to any promotion, local or remote.
+  remote publications, staging deployment and remote rollback are recorded separately. Git
+  tags are protected by the `immutable-release-tags` ruleset and an existing Quay tag is
+  refused unless `allow_republish=true`; the digest remains the immutable identity.
+- The gate identifiers P-02, P-06, P-07, P-10, P-11, P-12, P-13 and P-14 are defined in
+  `blueprint/gates.md`.
+- P-11 and P-12 are closed with the local promotion, remote publication, staging
+  deployment and remote rollback evidence and a solo-maintainer self-approval; the records
+  do not claim an independent approval. P-02 is closed with a solo-maintainer analysis
+  self-review for the documentation and CI closure change set; P-07 is closed with the
+  same limitation. The Quality gate above remains applicable to any promotion, local or
+  remote.
 
 ## Local promotion record
 
@@ -111,12 +116,12 @@ Two publications of `0.1.0` were executed on 2026-11-01:
 | CI run | 41332436321 (`success`) | 41334455181 (`success`) |
 | CD run | 41332436297 (`success`) | 41334455398 (`success`) |
 | Digest | `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b` (superseded) | `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17` |
-| Environment | GitHub Actions runner, Podman by digest; no staging or production target | Same |
+| Environment at publication time | GitHub Actions runner, Podman by digest; no staging or production target | Same |
 | Registry | `quay.io/odysseia/hello-service:0.1.0` | Same |
 | Auth mode | `oidc` | `oidc` |
 | Promotion result | Published, deployed by digest and smoke-tested | Published, deployed by digest and smoke-tested |
-| Promotion mechanism | Prepared for the same digest; no second environment configured | Prepared for the same digest; no second environment configured |
-| Rollback | Not exercised; no previous remote release recorded | Not exercised; no previous remote release recorded |
+| Promotion mechanism at publication time | Prepared for the same digest; no second environment configured | Prepared for the same digest; no second environment configured |
+| Rollback at publication time | Not exercised; no previous remote release recorded | Not exercised; no previous remote release recorded |
 | Records | `blueprint/changes/p11-remote-publication.md`, `blueprint/reviews/remote-publication.md` | Same |
 | Approval | Solo-maintainer self-review; no independent approval | Solo-maintainer self-review; no independent approval |
 
@@ -125,19 +130,44 @@ The digest is the immutable identity. The Git tag namespace is protected by a ru
 `allow_republish=true`. Automatic push publication is disabled; publication requires
 `workflow_dispatch`.
 
+## Staging promotion and remote rollback records
+
+`cd.yml` now accepts `target_environment` (`staging` default, `production`) and an optional
+`image_digest`. With a digest, the workflow validates `sha256:<64 hex>`, skips build,
+publication, registry login and the tag guard, deploys
+`quay.io/odysseia/hello-service@<digest>`, and runs the same smoke test. Without a digest it
+keeps the publish-and-deploy path.
+
+| Event | Run | Environment | Digest | Result |
+| --- | --- | --- | --- | --- |
+| Staging deployment | [42241159036](https://github.com/JorvaCode/hello-service/actions/runs/42241159036) | `staging` | `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17` | `success`; built/published steps skipped; smoke passed |
+| Unavailable rollback target | [42241318818](https://github.com/JorvaCode/hello-service/actions/runs/42241318818) | `staging` | `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b` | `failure`; `manifest unknown` |
+| Remote rollback | [42241543717](https://github.com/JorvaCode/hello-service/actions/runs/42241543717) | `staging` | `sha256:81ca2f236241fe443f4d1633b254dcc2b90e32fd3bc07b35e5969be3e7e9b833` (`0.0.1-SNAPSHOT`) | `success`; built/published steps skipped; smoke passed |
+
+All runs used `main` at `6d5fa89a3a4de7ae911e50054ab1be2a234e1b02` and the GitHub
+`staging` environment, which is restricted to `main`. The deployment still runs on the
+GitHub Actions runner, not an external host. The rollback target must be verified pullable:
+the superseded `0.1.0` digest was listed by the tag API but returned `manifest unknown`.
+The staging environment is left on the `0.0.1-SNAPSHOT` digest after the exercised rollback.
+Records: `blueprint/changes/p11-staging-rollback.md`,
+`blueprint/testing/staging-rollback.md`,
+`blueprint/deployment/remote-staging-0.1.0.md`.
+
 ## Release controls
 
 | Control | Where | Behaviour |
 | --- | --- | --- |
 | Manual publication | `.github/workflows/cd.yml` | Only `workflow_dispatch`; a push to `main` does not publish. |
-| Environment protection | GitHub environment `production` | Deployment branch policy allows `main` only. |
+| Environment protection | GitHub environments `staging` and `production` | Deployment branch policy allows `main` only. |
+| Digest deployment / rollback | `cd.yml` input `image_digest` | Validates `sha256:<64 hex>` and deploys that image by digest without build, publication or tag mutation. |
 | Git tag immutability | GitHub ruleset `immutable-release-tags` (`refs/tags/*`) | Blocks update, force-push and deletion of release tags. |
 | Image tag immutability | `cd.yml` step `Enforce immutable release tag` | Refuses to publish if the version tag already exists in Quay; `allow_republish=true` is the explicit override. |
 
-The environment uses a branch policy rather than required reviewers: GitHub does not let
+The environments use a branch policy rather than required reviewers: GitHub does not let
 the user who triggered a run approve its deployment, and the repository has one maintainer.
 The manual dispatch remains the approval signal; the limitation is recorded in
-`blueprint/changes/p11-tag-immutable-env.md`.
+`blueprint/changes/p11-tag-immutable-env.md` and
+`blueprint/changes/p11-staging-rollback.md`.
 
 ## Environments
 Common examples:

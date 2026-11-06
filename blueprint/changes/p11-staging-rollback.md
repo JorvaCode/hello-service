@@ -1,4 +1,4 @@
-# Change: `CHG-DEL-003` - Staging target and digest rollback path
+# Change: `CHG-DEL-005` - Staging target and digest rollback path
 
 ## Requirement
 
@@ -31,15 +31,29 @@ artifact for traceability.
   boundary and is not represented as a separate server fleet.
 - Rollback is a container replacement by digest. There is no persistent state or schema
   migration in `hello-service`.
-- The previous published digests remain available: current
-  `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17` and previous
-  `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`.
+- The current published digest is
+  `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17`. The earlier
+  `0.1.0` digest `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b`
+  is still listed by the tag API but was not pullable on 2026-11-06; the exercised remote
+  rollback target is the pullable `0.0.1-SNAPSHOT` digest
+  `sha256:81ca2f236241fe443f4d1633b254dcc2b90e32fd3bc07b35e5969be3e7e9b833`.
 
 ## Execution evidence
 
-Pending: the workflow must be merged to `main` before the protected `staging` environment
-can execute it. The staging deployment and rollback runs will be recorded in
-`blueprint/testing/staging-rollback.md` and this change record after execution.
+The workflow was merged to `main` as `6d5fa89` and dispatched from `main` against the
+protected `staging` environment.
+
+| Step | Run | Digest | Result |
+| --- | --- | --- | --- |
+| Staging deployment | [42241159036](https://github.com/JorvaCode/hello-service/actions/runs/42241159036) | `sha256:0d8deffb7c8427c9f72be9496c6ad851e68b00fd147094d0df297db9e5c6ce17` | `success`; build/publication skipped; `SMOKE_OK target=staging code=200 content-type=text/plain;charset=UTF-8 body=Hello, World!` |
+| Rollback attempt | [42241318818](https://github.com/JorvaCode/hello-service/actions/runs/42241318818) | `sha256:4d06e515314b5efeb20d03133a88cfe9ad0ee8d7fd6a287a1dd84b886e6de31b` | `failure`; the digest returned by the Quay tag API was no longer pullable (`manifest unknown`). |
+| Remote rollback | [42241543717](https://github.com/JorvaCode/hello-service/actions/runs/42241543717) | `sha256:81ca2f236241fe443f4d1633b254dcc2b90e32fd3bc07b35e5969be3e7e9b833` (`0.0.1-SNAPSHOT`) | `success`; build/publication skipped; `SMOKE_OK target=staging code=200 content-type=text/plain;charset=UTF-8 body=Hello, World!` |
+
+All three runs used commit `6d5fa89a3a4de7ae911e50054ab1be2a234e1b02` on `main`. The
+failed attempt is retained as a finding: a digest listed by the tag API must be verified
+pullable before being used as a rollback target. Details are in
+`blueprint/testing/staging-rollback.md`; the deployment record is
+`blueprint/deployment/remote-staging-0.1.0.md`.
 
 ## Rollback of this change
 
