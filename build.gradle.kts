@@ -20,6 +20,7 @@ repositories {
 extra["tomcat.version"] = "10.1.59"
 extra["spring-framework.version"] = "6.2.19"
 extra["jackson-bom.version"] = "2.21.7"
+extra["micrometer.version"] = "1.15.12"
 
 dependencyLocking {
     lockAllConfigurations()
